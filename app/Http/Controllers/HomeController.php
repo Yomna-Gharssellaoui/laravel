@@ -39,6 +39,6 @@ class HomeController extends Controller
             $stats['alerts'] = Alert::whereIn('status', ['open', 'investigating'])->count();
         }
 
-        return view('frontend.home', compact('featuredProducts', 'publicAlerts', 'stats'));
+        return view('home', compact('featuredProducts', 'publicAlerts', 'stats'));
     }
 }
