@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
             // jsdelivr serves the Bootstrap bundle of the public layout; Alpine.js (back-office)
             // evaluates its directives with new Function(), hence 'unsafe-eval' in every environment.
             $scriptSrc = "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net";
-            $styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.bunny.net";
+            $styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.bunny.net https://fonts.googleapis.com";
             $connectSrc = "'self'";
             $imgSrc = "'self' data: blob:";
 
@@ -43,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
                 "style-src {$styleSrc}",
                 "connect-src {$connectSrc}",
                 "img-src {$imgSrc}",
-                "font-src https://fonts.bunny.net https://cdn.jsdelivr.net",
+                "font-src https://fonts.bunny.net https://cdn.jsdelivr.net https://fonts.gstatic.com",
                 "frame-ancestors 'none'",
             ]);
 

@@ -20,10 +20,12 @@ class AccessControlTest extends TestCase
     public function test_consumer_cannot_open_the_back_office(): void
     {
         $consumer = User::factory()->create();
+        $product = Product::factory()->create();
 
         $this->actingAs($consumer)->get('/admin/dashboard')->assertForbidden();
         $this->actingAs($consumer)->get('/admin/products')->assertForbidden();
-        $this->actingAs($consumer)->delete('/admin/products/1')->assertForbidden();
+        $this->actingAs($consumer)->delete("/admin/products/{$product->id}")->assertForbidden();
+        $this->assertModelExists($product);
     }
 
     public function test_unverified_admin_must_verify_email_first(): void

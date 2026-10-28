@@ -124,7 +124,9 @@ PROMPT;
     {
         $client = new Client(apiKey: config('services.anthropic.api_key'));
 
-        $message = $client->messages->create(
+        // Beta endpoint only for the server-side fallback: if the model declines,
+        // the API retries on a fallback model instead of returning a refusal
+        $message = $client->beta->messages->create(
             model: config('services.anthropic.model'),
             maxTokens: 4000,
             system: self::SYSTEM_PROMPT,
@@ -138,6 +140,8 @@ PROMPT;
                     'schema' => self::RESPONSE_SCHEMA,
                 ],
             ],
+            fallbacks: 'default',
+            betas: ['server-side-fallback-2026-07-01'],
         );
 
         if ($message->stopReason === 'refusal') {
