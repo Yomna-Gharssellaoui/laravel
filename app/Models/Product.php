@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -23,7 +25,59 @@ class Product extends Model
         'producer_id',
         'transformer_id',
         'status',
+        'image_path',
     ];
+
+    public const STATUSES = ['draft', 'published', 'archived'];
+
+    /**
+     * Products a back-office user is allowed to see.
+     * Admin: everything. Producer / transformer: their own products.
+     * Distributor: products they carry in a supply-chain trace.
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return match ($user->role) {
+            'admin' => $query,
+            'producer' => $query->where('producer_id', $user->producer?->id ?? 0),
+            'transformer' => $query->where('transformer_id', $user->transformer?->id ?? 0),
+            'distributor' => $query->whereHas('supplyChainTraces', fn ($q) => $q->where('distributor_id', $user->distributor?->id ?? 0)),
+            default => $query->whereRaw('1 = 0'),
+        };
+    }
+
+    public function isOwnedBy(User $user): bool
+    {
+        return match ($user->role) {
+            'admin' => true,
+            'producer' => $user->producer !== null && $this->producer_id === $user->producer->id,
+            'transformer' => $user->transformer !== null && $this->transformer_id === $user->transformer->id,
+            default => false,
+        };
+    }
+
+    public function imageUrl(): ?string
+    {
+        return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+    }
+
+    /**
+     * Whether the product has what it needs to be shown publicly.
+     */
+    public function missingForPublication(): array
+    {
+        $missing = [];
+
+        if (! $this->environmentalFootprint()->exists()) {
+            $missing[] = 'une empreinte environnementale';
+        }
+
+        if (! $this->certificates()->whereIn('status', ['verified', 'pending'])->exists()) {
+            $missing[] = 'au moins une certification';
+        }
+
+        return $missing;
+    }
 
     public function producer(): BelongsTo
     {

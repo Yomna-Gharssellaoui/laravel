@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Alert;
+use App\Models\ComplianceCheck;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class AlertController extends Controller
     {
         return view('admin.alerts.create', [
             'products' => Product::orderBy('name')->get(),
+            'complianceChecks' => ComplianceCheck::with('environmentalClaim')->latest()->get(),
         ]);
     }
 
@@ -43,7 +45,7 @@ class AlertController extends Controller
 
     public function show(Alert $alert): View
     {
-        $alert->load('product');
+        $alert->load(['product', 'complianceCheck.environmentalClaim']);
 
         return view('admin.alerts.show', ['item' => $alert]);
     }
@@ -53,6 +55,7 @@ class AlertController extends Controller
         return view('admin.alerts.edit', [
             'item' => $alert,
             'products' => Product::orderBy('name')->get(),
+            'complianceChecks' => ComplianceCheck::with('environmentalClaim')->latest()->get(),
         ]);
     }
 
@@ -74,15 +77,22 @@ class AlertController extends Controller
 
     private function validated(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'product_id' => ['required', 'exists:products,id'],
+            'compliance_check_id' => ['nullable', 'exists:compliance_checks,id'],
             'alert_type' => ['required', 'string', 'max:100'],
-            'severity' => ['required', Rule::in(['low', 'medium', 'high', 'critical'])],
+            'severity' => ['required', Rule::in(Alert::SEVERITIES)],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'detected_at' => ['nullable', 'date'],
-            'status' => ['required', Rule::in(['open', 'investigating', 'resolved', 'dismissed'])],
-            'resolution' => ['nullable', 'string'],
+            'status' => ['required', Rule::in(Alert::STATUSES)],
+            'resolution' => ['required_if:status,resolved,dismissed', 'nullable', 'string'],
+        ], [
+            'resolution.required_if' => 'Décrivez la résolution avant de clôturer l’alerte.',
         ]);
+
+        $data['detected_at'] ??= now();
+
+        return $data;
     }
 }

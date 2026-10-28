@@ -93,7 +93,6 @@ class EnvironmentalFootprintController extends Controller
             'co2_emissions' => ['nullable', 'numeric', 'min:0'],
             'water_usage' => ['nullable', 'numeric', 'min:0'],
             'land_usage' => ['nullable', 'numeric', 'min:0'],
-            'ai_score' => ['nullable', 'integer', 'min:0', 'max:100'],
         ]);
     }
 }

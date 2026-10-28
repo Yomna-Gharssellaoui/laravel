@@ -27,7 +27,7 @@ class ConsumerProfileTest extends TestCase
             ->assertSee('Modifier mes préférences');
 
         $payload = [
-            'preferences' => 'local, bio, faible_co2',
+            'preferences' => ['local', 'bio', 'faible_co2'],
             'sustainability_level' => 'engagé',
             'dietary_restrictions' => 'végétarien',
             'allergies' => 'gluten',
@@ -45,5 +45,7 @@ class ConsumerProfileTest extends TestCase
 
         $fresh = $consumer->fresh();
         $this->assertSame('engagé', $fresh->sustainability_level);
+        $this->assertSame(['local', 'bio', 'faible_co2'], $fresh->preferences);
+        $this->assertSame(['gluten'], $fresh->allergies);
     }
 }

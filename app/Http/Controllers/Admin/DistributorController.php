@@ -7,6 +7,7 @@ use App\Models\Distributor;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class DistributorController extends Controller
@@ -15,8 +16,9 @@ class DistributorController extends Controller
     {
         $items = Distributor::with('user')
             ->withCount('supplyChainTraces')
-            ->when($request->q, fn ($q) => $q->where('company_name', 'like', '%'.$request->q.'%')
-                ->orWhere('location', 'like', '%'.$request->q.'%'))
+            ->when($request->q, fn ($q) => $q->where(fn ($query) => $query
+                ->where('company_name', 'like', '%'.$request->q.'%')
+                ->orWhere('location', 'like', '%'.$request->q.'%')))
             ->latest()
             ->paginate(12)
             ->withQueryString();
@@ -27,7 +29,7 @@ class DistributorController extends Controller
     public function create(): View
     {
         return view('admin.distributors.create', [
-            'users' => User::where('role', 'distributor')->orderBy('name')->get(),
+            'users' => $this->availableUsers(),
         ]);
     }
 
@@ -50,13 +52,13 @@ class DistributorController extends Controller
     {
         return view('admin.distributors.edit', [
             'item' => $distributor,
-            'users' => User::where('role', 'distributor')->orderBy('name')->get(),
+            'users' => $this->availableUsers($distributor),
         ]);
     }
 
     public function update(Request $request, Distributor $distributor): RedirectResponse
     {
-        $distributor->update($this->validated($request));
+        $distributor->update($this->validated($request, $distributor));
 
         return redirect()->route('admin.distributors.show', $distributor)
             ->with('success', 'Distributeur mis à jour.');
@@ -70,10 +72,25 @@ class DistributorController extends Controller
             ->with('success', 'Distributeur supprimé.');
     }
 
-    private function validated(Request $request): array
+    /**
+     * Accounts with the distributor role that are not yet linked to another company.
+     */
+    private function availableUsers(?Distributor $current = null)
+    {
+        return User::where('role', 'distributor')
+            ->where(fn ($q) => $q->whereDoesntHave('distributor')->orWhere('id', $current?->user_id ?? 0))
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function validated(Request $request, ?Distributor $distributor = null): array
     {
         return $request->validate([
-            'user_id' => ['nullable', 'exists:users,id'],
+            'user_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where('role', 'distributor'),
+                Rule::unique('distributors', 'user_id')->ignore($distributor),
+            ],
             'company_name' => ['required', 'string', 'max:255'],
             'distributor_type' => ['nullable', 'string', 'max:100'],
             'location' => ['nullable', 'string', 'max:255'],

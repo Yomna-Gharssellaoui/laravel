@@ -1,59 +1,80 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Trace Verte
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Plateforme de traçabilité alimentaire : chaque produit est suivi du producteur au distributeur,
+avec son empreinte environnementale, ses certifications, ses déclarations environnementales et
+une détection du greenwashing par IA.
 
-## About Laravel
+Laravel 12 · Breeze (Blade) · Tailwind (back-office) · Bootstrap (site public) · SQLite par défaut.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Installation
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed
+php artisan storage:link
+npm install && npm run build
+composer dev   # serveur + worker de file d'attente + logs + Vite
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Tâches planifiées (expiration des certifications, alertes automatiques) :
 
-## Learning Laravel
+```bash
+php artisan schedule:work          # en local
+php artisan traceverte:scan-alerts # exécution manuelle
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Comptes de démonstration
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Mot de passe : `password`
 
-## Laravel Sponsors
+| Email | Rôle | Accès |
+|---|---|---|
+| admin@traceverte.test | admin | tout le back-office |
+| producer@traceverte.test | producer | ses produits, leurs certifications et traces |
+| transformer@traceverte.test | transformer | les produits qu'il transforme |
+| distributor@traceverte.test | distributor | les traces logistiques qu'il assure |
+| consumer@traceverte.test | consumer | site public, avis, recommandations |
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Rôles et permissions
 
-### Premium Partners
+- Rôles stockés dans `users.role` ; le rôle n'est **pas** assignable en masse : seul un admin le change.
+- Routes protégées par les middlewares `auth`, `verified` (MustVerifyEmail), `active` (comptes suspendus) et `role:...`.
+- Produits, certifications et traces sont partagés avec les acteurs de la chaîne : l'accès est contrôlé
+  par les policies `ProductPolicy`, `CertificatePolicy` et `SupplyChainTracePolicy`, et les listes sont
+  filtrées par `Product::visibleTo($user)`.
+- Un producteur ne peut pas valider ses propres certifications (statut forcé à `pending`).
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Modules du back-office
 
-## Contributing
+| Module | Fonctionnalités |
+|---|---|
+| Utilisateurs | CRUD, changement de rôle, suspension, renvoi de l'email de vérification |
+| Produits | CRUD, image, filtres, publication bloquée sans empreinte ni certification, analyse IA |
+| Empreintes | CO₂ / eau / sols ; score 0-100 **calculé** (CO₂ 50 %, eau 30 %, sols 20 %) |
+| Déclarations | CRUD, justificatif PDF/image, analyse de greenwashing lancée automatiquement (file d'attente) |
+| Conformité | Produit repris de la déclaration ; `failed` ⇒ alerte + déclaration rejetée, `passed` ⇒ validée |
+| Producteurs / Transformateurs / Distributeurs | CRUD, compte lié unique et du bon rôle |
+| Traces logistiques | Étapes datées avec GPS, position actuelle et distance (Haversine) calculées |
+| Certifications | CRUD, document, numéro unique par émetteur, badge d'expiration, expiration automatique |
+| Alertes | CRUD, lien vers la vérification, résolution obligatoire à la clôture, email aux admins (high/critical), alertes automatiques |
+| Avis | Rédigés par les consommateurs sur le site, modérés (approuver / refuser) dans le back-office |
+| Analyses IA | Générées par `GreenwashingAnalyzer`, jamais saisies à la main |
+| Consommateurs / Recommandations | Préférences fixes, allergies ; scores calculés par `RecommendationEngine` |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## IA : détection du greenwashing
 
-## Code of Conduct
+`app/Services/GreenwashingAnalyzer.php` envoie la déclaration et ses preuves (certifications, empreinte,
+vérifications) à l'API Claude et reçoit une réponse JSON structurée (score de risque, crédibilité,
+résumé, signaux d'alerte). Renseignez `ANTHROPIC_API_KEY` dans `.env` pour l'activer.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Sans clé (ou si l'API ne répond pas), une heuristique locale explicable prend le relais ; l'analyse est
+alors marquée `is_demo` et le moteur affiché est `heuristique-locale-v1`.
 
-## Security Vulnerabilities
+## Tests
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan test
+```

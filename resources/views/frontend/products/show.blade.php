@@ -80,6 +80,46 @@
                         @else
                             <p class="text-sm text-slate-600">Aucun avis vérifié n’a encore été publié pour ce produit.</p>
                         @endif
+
+                        <div class="mt-6 border-t border-slate-100 pt-5">
+                            @auth
+                                @php($mine = $product->reviews()->where('user_id', auth()->id())->first())
+                                @if($product->status !== 'published')
+                                    <p class="text-sm text-slate-600">Les avis sont ouverts une fois le produit publié.</p>
+                                @elseif(! auth()->user()->hasVerifiedEmail())
+                                    <p class="text-sm text-slate-600">Vérifiez votre adresse email pour donner votre avis.</p>
+                                @else
+                                    <h3 class="text-base font-semibold text-slate-800">{{ $mine ? 'Modifier mon avis' : 'Donner mon avis' }}</h3>
+                                    @if($mine)
+                                        <p class="mt-1 text-xs text-slate-500">Statut : {{ $mine->status === 'approved' ? 'publié' : ($mine->status === 'rejected' ? 'refusé par la modération' : 'en attente de modération') }}</p>
+                                    @endif
+                                    <form method="POST" action="{{ $mine ? route('reviews.update', $mine) : route('reviews.store', $product) }}" class="mt-3 space-y-3">
+                                        @csrf
+                                        @if($mine) @method('PUT') @endif
+                                        <div class="flex flex-wrap gap-3">
+                                            <select name="rating" class="tv-input w-32" required aria-label="Note">
+                                                @foreach([5, 4, 3, 2, 1] as $n)
+                                                    <option value="{{ $n }}" @selected((int) old('rating', $mine?->rating ?? 5) === $n)>{{ $n }} / 5</option>
+                                                @endforeach
+                                            </select>
+                                            <input type="text" name="title" value="{{ old('title', $mine?->title) }}" maxlength="255" placeholder="Titre" class="tv-input flex-1">
+                                        </div>
+                                        <textarea name="comment" rows="3" maxlength="2000" placeholder="Votre avis" class="tv-input w-full">{{ old('comment', $mine?->comment) }}</textarea>
+                                        <div class="flex gap-3">
+                                            <button type="submit" class="tv-btn-primary">{{ $mine ? 'Mettre à jour' : 'Envoyer' }}</button>
+                                        </div>
+                                    </form>
+                                    @if($mine)
+                                        <form method="POST" action="{{ route('reviews.destroy', $mine) }}" class="mt-2" onsubmit="return confirm('Supprimer votre avis ?');">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="text-sm text-red-600 hover:underline">Supprimer mon avis</button>
+                                        </form>
+                                    @endif
+                                @endif
+                            @else
+                                <p class="text-sm text-slate-600"><a href="{{ route('login') }}" class="tv-link">Connectez-vous</a> pour donner votre avis.</p>
+                            @endauth
+                        </div>
                     </div>
 
                     <div class="tv-card">

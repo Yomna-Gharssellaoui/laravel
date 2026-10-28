@@ -25,16 +25,23 @@
 
                                 <div class="row g-4">
                                     <div class="col-12">
-                                        <label for="preferences" class="form-label fw-semibold">Préférences</label>
-                                        <input id="preferences" name="preferences" value="{{ old('preferences', implode(', ', $consumer->preferences ?? [])) }}" class="form-control form-control-lg" placeholder="local, bio, faible_co2">
-                                        <small class="form-text text-muted">Séparez les préférences par des virgules (ex. local, bio).</small>
-                                        @error('preferences')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
+                                        <span class="form-label fw-semibold d-block">Préférences</span>
+                                        @php($selected = old('preferences', $consumer->preferences ?? []))
+                                        <div class="d-flex flex-wrap gap-4 mt-2">
+                                            @foreach(\App\Models\Consumer::PREFERENCES as $key => $label)
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" name="preferences[]" value="{{ $key }}" id="pref-{{ $key }}" @checked(in_array($key, $selected, true))>
+                                                    <label class="form-check-label" for="pref-{{ $key }}">{{ $label }}</label>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        @error('preferences.*')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
                                     </div>
 
                                     <div class="col-md-6">
                                         <label for="sustainability_level" class="form-label fw-semibold">Niveau de durabilité</label>
                                         <select id="sustainability_level" name="sustainability_level" class="form-select form-select-lg">
-                                            @foreach(['débutant','intermédiaire','engagé','expert'] as $level)
+                                            @foreach(\App\Models\Consumer::LEVELS as $level)
                                                 <option value="{{ $level }}" @selected(old('sustainability_level', $consumer->sustainability_level) === $level)>{{ $level }}</option>
                                             @endforeach
                                         </select>
@@ -44,7 +51,7 @@
                                     <div class="col-md-6">
                                         <label for="budget_range" class="form-label fw-semibold">Budget</label>
                                         <select id="budget_range" name="budget_range" class="form-select form-select-lg">
-                                            @foreach(['éco','moyen','premium'] as $range)
+                                            @foreach(\App\Models\Consumer::BUDGETS as $range)
                                                 <option value="{{ $range }}" @selected(old('budget_range', $consumer->budget_range) === $range)>{{ $range }}</option>
                                             @endforeach
                                         </select>
@@ -60,6 +67,7 @@
                                     <div class="col-md-6">
                                         <label for="allergies" class="form-label fw-semibold">Allergies</label>
                                         <input id="allergies" name="allergies" value="{{ old('allergies', implode(', ', $consumer->allergies ?? [])) }}" class="form-control form-control-lg" placeholder="gluten, lactose">
+                                        <small class="form-text text-muted">Les produits dont les ingrédients contiennent une de vos allergies sont écartés des recommandations.</small>
                                         @error('allergies')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
                                     </div>
                                 </div>

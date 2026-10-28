@@ -21,6 +21,8 @@ class Review extends Model
         'status',
     ];
 
+    public const STATUSES = ['pending', 'approved', 'rejected'];
+
     protected function casts(): array
     {
         return [

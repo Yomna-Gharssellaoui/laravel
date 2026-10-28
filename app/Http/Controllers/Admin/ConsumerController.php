@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ConsumerPreferencesRequest;
 use App\Models\Consumer;
 use App\Models\User;
+use App\Services\RecommendationEngine;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -29,50 +31,42 @@ class ConsumerController extends Controller
 
     public function create(): View
     {
-        $users = User::where('role', 'consumer')
-            ->whereDoesntHave('consumer')
-            ->orderBy('name')
-            ->get();
-
-        return view('admin.consumers.create', compact('users'));
+        return view('admin.consumers.create', ['users' => $this->availableUsers()]);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(ConsumerPreferencesRequest $request, RecommendationEngine $engine): RedirectResponse
     {
-        $item = Consumer::create($this->validated($request));
+        $item = Consumer::create(['user_id' => $this->validatedUser($request)] + $request->preferences());
+
+        $engine->recompute($item);
 
         return redirect()->route('admin.consumers.show', $item)
-            ->with('success', 'Profil consommateur créé.');
+            ->with('success', 'Profil consommateur créé et recommandations calculées.');
     }
 
     public function show(Consumer $consumer): View
     {
-        $consumer->load(['user', 'personalRatings.product']);
+        $consumer->load(['user', 'personalRatings' => fn ($q) => $q->orderByDesc('personalized_score'), 'personalRatings.product']);
 
         return view('admin.consumers.show', ['item' => $consumer]);
     }
 
     public function edit(Consumer $consumer): View
     {
-        $users = User::where('role', 'consumer')
-            ->where(function ($q) use ($consumer) {
-                $q->whereDoesntHave('consumer')->orWhere('id', $consumer->user_id);
-            })
-            ->orderBy('name')
-            ->get();
-
         return view('admin.consumers.edit', [
             'item' => $consumer,
-            'users' => $users,
+            'users' => $this->availableUsers($consumer),
         ]);
     }
 
-    public function update(Request $request, Consumer $consumer): RedirectResponse
+    public function update(ConsumerPreferencesRequest $request, Consumer $consumer, RecommendationEngine $engine): RedirectResponse
     {
-        $consumer->update($this->validated($request, $consumer));
+        $consumer->update(['user_id' => $this->validatedUser($request, $consumer)] + $request->preferences());
+
+        $engine->recompute($consumer);
 
         return redirect()->route('admin.consumers.show', $consumer)
-            ->with('success', 'Profil consommateur mis à jour.');
+            ->with('success', 'Profil consommateur mis à jour et recommandations recalculées.');
     }
 
     public function destroy(Consumer $consumer): RedirectResponse
@@ -83,34 +77,22 @@ class ConsumerController extends Controller
             ->with('success', 'Profil consommateur supprimé.');
     }
 
-    private function validated(Request $request, ?Consumer $consumer = null): array
+    private function availableUsers(?Consumer $current = null)
     {
-        $data = $request->validate([
-            'user_id' => [
-                'required',
-                'exists:users,id',
-                Rule::unique('consumers', 'user_id')->ignore($consumer),
-            ],
-            'preferences' => ['nullable', 'string'],
-            'sustainability_level' => ['nullable', 'string', 'max:50'],
-            'dietary_restrictions' => ['nullable', 'string'],
-            'allergies' => ['nullable', 'string'],
-            'budget_range' => ['nullable', 'string', 'max:50'],
-        ]);
-
-        foreach (['preferences', 'dietary_restrictions', 'allergies'] as $field) {
-            $data[$field] = $this->csvToArray($data[$field] ?? null);
-        }
-
-        return $data;
+        return User::where('role', 'consumer')
+            ->where(fn ($q) => $q->whereDoesntHave('consumer')->orWhere('id', $current?->user_id ?? 0))
+            ->orderBy('name')
+            ->get();
     }
 
-    private function csvToArray(?string $value): ?array
+    private function validatedUser(Request $request, ?Consumer $consumer = null): int
     {
-        if ($value === null || trim($value) === '') {
-            return null;
-        }
-
-        return array_values(array_filter(array_map('trim', explode(',', $value))));
+        return (int) $request->validate([
+            'user_id' => [
+                'required',
+                Rule::exists('users', 'id')->where('role', 'consumer'),
+                Rule::unique('consumers', 'user_id')->ignore($consumer),
+            ],
+        ])['user_id'];
     }
 }

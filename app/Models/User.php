@@ -3,22 +3,26 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
+
+    public const ROLES = ['admin', 'producer', 'transformer', 'distributor', 'consumer'];
+
+    public const BACK_OFFICE_ROLES = ['admin', 'producer', 'transformer', 'distributor'];
 
     protected $fillable = [
         'name',
         'email',
         'password',
-        'role',
     ];
 
     protected $hidden = [
@@ -30,6 +34,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'blocked_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
@@ -71,8 +76,21 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isBlocked(): bool
+    {
+        return $this->blocked_at !== null;
+    }
+
     public function canAccessBackOffice(): bool
     {
-        return $this->hasRole(['admin', 'producer', 'transformer', 'distributor']);
+        return $this->hasRole(self::BACK_OFFICE_ROLES);
+    }
+
+    /**
+     * Where the user lands after login, depending on the role.
+     */
+    public function homeRoute(): string
+    {
+        return $this->canAccessBackOffice() ? 'admin.dashboard' : 'consumer.profile';
     }
 }

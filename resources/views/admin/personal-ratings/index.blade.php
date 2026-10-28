@@ -10,10 +10,12 @@
             
             <button class="tv-btn-secondary" type="submit">Filtrer</button>
         </form>
-        <a href="{{ route('admin.personal-ratings.create') }}" class="tv-btn-primary">Ajouter</a>
+        <form method="POST" action="{{ route('admin.personal-ratings.recompute') }}">
+            @csrf
+            <button type="submit" class="tv-btn-primary">Recalculer toutes les recommandations</button>
+        </form>
     </div>
 
-    <x-flash-messages />
 
     <div class="tv-card overflow-hidden p-0">
         <div class="overflow-x-auto">
@@ -27,10 +29,9 @@
                 <tbody>
                     @forelse($items as $item)
                         <tr>
-                            <td>{{ $item->consumer?->user.name ?? '—' }}</td><td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->personalized_score ?? '—' }}</td><td>{{ $item->reason ?? '—' }}</td>
+                            <td>{{ $item->consumer?->user?->name ?? '—' }}</td><td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->personalized_score ?? '—' }}</td><td class="max-w-md truncate" title="{{ $item->reason }}">{{ $item->recommendation_reason ?? '—' }}</td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.personal-ratings.show', $item) }}" class="tv-link">Voir</a>
-                                <a href="{{ route('admin.personal-ratings.edit', $item) }}" class="tv-link ml-2">Modifier</a>
                                 <form action="{{ route('admin.personal-ratings.destroy', $item) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Confirmer la suppression ?');">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:underline text-sm">Supprimer</button>
@@ -39,8 +40,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ count($cfg['columns']) + 1 }}">
-                                <x-empty-state title="Aucun évaluation" message="Commencez par créer une entrée." />
+                            <td colspan="100">
+                                <x-empty-state title="Aucune évaluation" message="Cliquez sur « Recalculer » pour générer les recommandations." />
                             </td>
                         </tr>
                     @endforelse

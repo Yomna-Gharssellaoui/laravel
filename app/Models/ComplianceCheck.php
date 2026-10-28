@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Observers\ComplianceCheckObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy(ComplianceCheckObserver::class)]
 class ComplianceCheck extends Model
 {
     use HasFactory;
@@ -20,6 +23,10 @@ class ComplianceCheck extends Model
         'notes',
         'checked_at',
     ];
+
+    public const STATUSES = ['pending', 'passed', 'failed', 'needs_review'];
+
+    public const TYPES = ['document_review', 'site_audit', 'lab_test', 'certificate_check'];
 
     protected function casts(): array
     {

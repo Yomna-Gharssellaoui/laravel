@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // Greenwashing analysis (Claude API). Without a key, a local heuristic is used instead.
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+        'model' => env('ANTHROPIC_MODEL', 'claude-opus-5-5'),
+    ],
+
 ];

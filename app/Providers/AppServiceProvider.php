@@ -21,17 +21,19 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Attach CSP header for all responses; in local environment allow eval for dev tooling.
+        // Attach a CSP header to every response; in local environment also allow the Vite dev server.
         Event::listen(RequestHandled::class, function (RequestHandled $event) {
             $response = $event->response;
 
-            $scriptSrc = "'self' 'unsafe-inline'";
+            // jsdelivr serves the Bootstrap bundle of the public layout; Alpine.js (back-office)
+            // evaluates its directives with new Function(), hence 'unsafe-eval' in every environment.
+            $scriptSrc = "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net";
             $styleSrc = "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.bunny.net";
             $connectSrc = "'self'";
-            $imgSrc = "'self' data:";
+            $imgSrc = "'self' data: blob:";
 
             if (app()->isLocal()) {
-                $scriptSrc .= " 'unsafe-eval' http://127.0.0.1:5173";
+                $scriptSrc .= ' http://127.0.0.1:5173';
                 $connectSrc .= " http://127.0.0.1:5173 ws://127.0.0.1:5173";
             }
 

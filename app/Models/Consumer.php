@@ -21,6 +21,18 @@ class Consumer extends Model
         'budget_range',
     ];
 
+    /** Preferences understood by the recommendation engine. */
+    public const PREFERENCES = [
+        'bio' => 'Bio / certifié',
+        'local' => 'Local',
+        'faible_co2' => 'Faible CO₂',
+        'faible_eau' => 'Faible consommation d’eau',
+    ];
+
+    public const LEVELS = ['débutant', 'intermédiaire', 'engagé', 'expert'];
+
+    public const BUDGETS = ['éco', 'moyen', 'premium'];
+
     protected function casts(): array
     {
         return [

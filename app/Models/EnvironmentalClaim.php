@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class EnvironmentalClaim extends Model
 {
@@ -19,7 +20,12 @@ class EnvironmentalClaim extends Model
         'source_document',
         'status',
         'confidence_score',
+        'document_path',
     ];
+
+    public const STATUSES = ['pending', 'verified', 'rejected'];
+
+    public const TYPES = ['100% écologique', 'Produit local', 'Sans pesticide', 'Biodégradable', 'Fabrication responsable', 'Neutre en carbone', 'Agriculture biologique'];
 
     protected function casts(): array
     {
@@ -36,5 +42,15 @@ class EnvironmentalClaim extends Model
     public function complianceChecks(): HasMany
     {
         return $this->hasMany(ComplianceCheck::class);
+    }
+
+    public function aiAnalyses(): HasMany
+    {
+        return $this->hasMany(AIAnalysis::class);
+    }
+
+    public function documentUrl(): ?string
+    {
+        return $this->document_path ? Storage::disk('public')->url($this->document_path) : null;
     }
 }
