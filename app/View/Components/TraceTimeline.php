@@ -9,9 +9,7 @@ use Illuminate\View\Component;
 
 class TraceTimeline extends Component
 {
-    public function __construct(public Collection $traces)
-    {
-    }
+    public function __construct(public Collection $traces) {}
 
     public function render(): View|Closure|string
     {

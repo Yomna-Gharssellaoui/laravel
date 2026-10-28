@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\EnvironmentalFootprintFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EnvironmentalFootprint extends Model
 {
-    /** @use HasFactory<\Database\Factories\EnvironmentalFootprintFactory> */
+    /** @use HasFactory<EnvironmentalFootprintFactory> */
     use HasFactory;
 
     protected $fillable = [

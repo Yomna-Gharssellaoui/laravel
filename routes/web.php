@@ -4,10 +4,12 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\ConsumerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProducerController;
+use App\Http\Controllers\ProductAssistantController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TransformerController;
+use App\Http\Controllers\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -21,6 +23,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Two-factor authentication (TOTP); enabling, disabling and new codes require the current password
+    Route::post('/user/two-factor', [TwoFactorController::class, 'enable'])->name('two-factor.enable');
+    Route::post('/user/two-factor/confirm', [TwoFactorController::class, 'confirm'])->name('two-factor.confirm');
+    Route::post('/user/two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('two-factor.recovery-codes');
+    Route::delete('/user/two-factor', [TwoFactorController::class, 'disable'])->name('two-factor.disable');
 });
 
 Route::middleware(['auth', 'verified', 'active'])->group(function () {
@@ -30,6 +38,9 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/mes-recommandations', [ConsumerController::class, 'recommendations'])->name('consumer.recommendations');
 
     Route::post('/produits/{product}/avis', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::post('/produits/{product}/assistant', ProductAssistantController::class)
+        ->middleware('throttle:10,1')
+        ->name('products.assistant');
     Route::put('/avis/{review}', [ReviewController::class, 'update'])->name('reviews.update');
     Route::delete('/avis/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 });
@@ -37,6 +48,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
 Route::get('/produits', [ProductController::class, 'index'])->name('products.index');
 Route::get('/produits/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/produits/{product}/trace', [ProductController::class, 'trace'])->name('products.trace');
+Route::get('/produits/{product}/qr-code', [ProductController::class, 'qrCode'])->name('products.qr');
 Route::get('/producteurs', [ProducerController::class, 'index'])->name('producers.index');
 Route::get('/producteurs/{producer}', [ProducerController::class, 'show'])->name('producers.show');
 Route::get('/transformateurs', [TransformerController::class, 'index'])->name('transformers.index');

@@ -81,6 +81,17 @@
         </dl>
     </div>
 
+    @if($item->status === 'published')
+        <div class="tv-card mt-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <div class="rounded-xl border border-slate-200 bg-white p-2">{!! $item->traceQrCodeSvg(140) !!}</div>
+            <div>
+                <h3 class="tv-section-title mb-1">QR code de traçabilité</h3>
+                <p class="text-sm text-slate-600">À imprimer sur l’emballage : il ouvre la page publique du parcours du produit.</p>
+                <a href="{{ route('products.qr', $item) }}" class="tv-btn-secondary mt-3">Télécharger (SVG)</a>
+            </div>
+        </div>
+    @endif
+
     @if($item->aiAnalyses->isNotEmpty())
         <div class="tv-card mt-6">
             <h3 class="tv-section-title">Dernières analyses IA</h3>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\ConsumerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Consumer extends Model
 {
-    /** @use HasFactory<\Database\Factories\ConsumerFactory> */
+    /** @use HasFactory<ConsumerFactory> */
     use HasFactory;
 
     protected $fillable = [

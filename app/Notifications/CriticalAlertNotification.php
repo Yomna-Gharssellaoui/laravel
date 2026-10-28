@@ -12,9 +12,7 @@ class CriticalAlertNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public Alert $alert)
-    {
-    }
+    public function __construct(public Alert $alert) {}
 
     public function via(object $notifiable): array
     {

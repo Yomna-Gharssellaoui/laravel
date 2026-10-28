@@ -57,7 +57,10 @@
                     <h1 class="font-display text-xl font-semibold text-brand-800">@yield('page-title', 'Dashboard')</h1>
                 </div>
                 <div class="flex items-center gap-3 text-sm">
-                    <span class="hidden sm:inline text-slate-500">{{ auth()->user()->name }}</span>
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 text-slate-600 hover:text-brand-700">
+                        <x-avatar :user="auth()->user()" class="h-8 w-8 text-xs" />
+                        <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
+                    </a>
                     <x-status-badge :status="auth()->user()->role" />
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="tv-btn-secondary" type="submit">Déconnexion</button></form>
                 </div>

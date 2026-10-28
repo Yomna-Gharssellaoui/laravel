@@ -109,5 +109,4 @@ class ProducerController extends Controller
 
         return $data;
     }
-
 }

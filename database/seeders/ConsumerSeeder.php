@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Consumer;
 use Illuminate\Database\Seeder;
 
 class ConsumerSeeder extends Seeder
@@ -12,6 +12,6 @@ class ConsumerSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Consumer::factory()->count(12)->create();
+        Consumer::factory()->count(12)->create();
     }
 }

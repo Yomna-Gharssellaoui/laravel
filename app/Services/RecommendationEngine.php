@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Consumer;
 use App\Models\PersonalRating;
 use App\Models\Product;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**

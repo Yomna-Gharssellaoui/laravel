@@ -6,6 +6,7 @@ use Anthropic\Client;
 use App\Models\AIAnalysis;
 use App\Models\EnvironmentalClaim;
 use App\Models\Product;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
@@ -84,7 +85,7 @@ PROMPT;
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, EnvironmentalClaim>  $claims
+     * @param  Collection<int, EnvironmentalClaim>  $claims
      */
     private function run(Product $product, $claims, string $type, ?EnvironmentalClaim $claim = null): AIAnalysis
     {

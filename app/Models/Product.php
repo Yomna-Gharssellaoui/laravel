@@ -2,8 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use BaconQrCode\Renderer\Color\Rgb;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\Fill;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
+use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductFactory> */
+    /** @use HasFactory<ProductFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -54,6 +61,19 @@ class Product extends Model
             'transformer' => $user->transformer !== null && $this->transformer_id === $user->transformer->id,
             default => false,
         };
+    }
+
+    /**
+     * SVG QR code pointing to the public traceability page (to print on the packaging).
+     */
+    public function traceQrCodeSvg(int $size = 200): string
+    {
+        $svg = (new Writer(new ImageRenderer(
+            new RendererStyle($size, 1, null, null, Fill::uniformColor(new Rgb(255, 255, 255), new Rgb(20, 58, 36))),
+            new SvgImageBackEnd
+        )))->writeString(route('products.trace', $this));
+
+        return trim(substr($svg, strpos($svg, "\n") + 1));
     }
 
     public function imageUrl(): ?string

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Producer;
 use Illuminate\Database\Seeder;
 
 class ProducerSeeder extends Seeder
@@ -13,7 +13,7 @@ class ProducerSeeder extends Seeder
     public function run(): void
     {
         // Create a handful of producers with associated user accounts
-        \App\Models\Producer::factory()
+        Producer::factory()
             ->count(12)
             ->withUser()
             ->create();

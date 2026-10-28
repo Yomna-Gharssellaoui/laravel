@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\SupplyChainTraceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupplyChainTrace extends Model
 {
-    /** @use HasFactory<\Database\Factories\SupplyChainTraceFactory> */
+    /** @use HasFactory<SupplyChainTraceFactory> */
     use HasFactory;
 
     protected $fillable = [

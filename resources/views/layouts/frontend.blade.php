@@ -33,7 +33,9 @@
                         <a href="{{ route('admin.dashboard') }}" class="text-sm font-medium text-slate-600 hover:text-brand-700">Back-office</a>
                     @endif
                     <a href="{{ route('consumer.profile') }}" class="text-sm font-medium {{ request()->routeIs('consumer.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Mon espace</a>
-                    <a href="{{ route('profile.edit') }}" class="text-sm font-medium text-slate-600 hover:text-brand-700">Mon compte</a>
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-brand-700">
+                        <x-avatar :user="auth()->user()" class="h-8 w-8 text-xs" /> Mon compte
+                    </a>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="tv-btn-secondary">Déconnexion</button>

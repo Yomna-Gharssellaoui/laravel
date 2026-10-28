@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\AIAnalysisFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AIAnalysis extends Model
 {
-    /** @use HasFactory<\Database\Factories\AIAnalysisFactory> */
+    /** @use HasFactory<AIAnalysisFactory> */
     use HasFactory;
 
     protected $table = 'ai_analyses';

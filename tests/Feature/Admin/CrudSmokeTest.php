@@ -16,7 +16,7 @@ class CrudSmokeTest extends TestCase
     use RefreshDatabase;
 
     private const MODULES = [
-        'users' => [Models\User::class, true],
+        'users' => [User::class, true],
         'products' => [Models\Product::class, true],
         'environmental-footprints' => [Models\EnvironmentalFootprint::class, true],
         'environmental-claims' => [Models\EnvironmentalClaim::class, true],

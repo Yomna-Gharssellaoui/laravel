@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ConsumerPreferencesRequest;
 use App\Models\Consumer;
 use App\Models\PersonalRating;
+use App\Services\RecommendationEngine;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Services\RecommendationEngine;
 use Illuminate\View\View;
 
 class ConsumerController extends Controller

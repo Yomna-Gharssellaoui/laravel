@@ -15,9 +15,7 @@ class AnalyzeClaimJob implements ShouldQueue
 
     public int $backoff = 30;
 
-    public function __construct(public EnvironmentalClaim $claim)
-    {
-    }
+    public function __construct(public EnvironmentalClaim $claim) {}
 
     public function handle(GreenwashingAnalyzer $analyzer): void
     {

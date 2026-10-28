@@ -19,6 +19,30 @@ npm install && npm run build
 composer dev   # serveur + worker de file d'attente + logs + Vite
 ```
 
+### Avec Docker (app + file d'attente + planificateur + MySQL + Mailpit)
+
+```bash
+cp .env.example .env        # puis renseigner APP_KEY (php artisan key:generate --show)
+docker compose up -d --build
+```
+
+- Application : http://localhost:8000
+- Emails envoyés (vérification, mot de passe oublié, alertes) : http://localhost:8025
+
+### Recevoir les emails en local sans Docker
+
+Par défaut (`MAIL_MAILER=log`) les emails sont écrits dans `storage/logs/laravel.log`.
+Pour les recevoir réellement, utilisez un compte gratuit [Mailtrap](https://mailtrap.io) (Email Testing)
+et copiez ses identifiants SMTP dans `.env` :
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+```
+
 Tâches planifiées (expiration des certifications, alertes automatiques) :
 
 ```bash
@@ -64,6 +88,20 @@ Mot de passe : `password`
 | Analyses IA | Générées par `GreenwashingAnalyzer`, jamais saisies à la main |
 | Consommateurs / Recommandations | Préférences fixes, allergies ; scores calculés par `RecommendationEngine` |
 
+## Gestion des utilisateurs
+
+| Exigence | Implémentation |
+|---|---|
+| Inscription, connexion, déconnexion | Laravel Breeze, routes protégées par `auth` |
+| Mot de passe oublié | Lien par email, jeton valable 60 minutes |
+| Vérification d'email | `MustVerifyEmail` + middleware `verified` |
+| Rôles | admin, producer, transformer, distributor, consumer ; middleware `role`, policies, contrôle serveur |
+| 2FA | TOTP via Laravel **Fortify** : QR code, confirmation par un premier code, 8 codes de récupération, activation et désactivation par l'utilisateur, étape de code à la connexion |
+| Profil | Nom, email, mot de passe, **photo de profil**, suppression du compte |
+| Administration | CRUD des comptes, changement de rôle, suspension, renvoi de l'email de vérification |
+
+Messages de validation et emails en français (`lang/fr`).
+
 ## IA : détection du greenwashing
 
 `app/Services/GreenwashingAnalyzer.php` envoie la déclaration et ses preuves (certifications, empreinte,
@@ -72,6 +110,27 @@ résumé, signaux d'alerte). Renseignez `ANTHROPIC_API_KEY` dans `.env` pour l'a
 
 Sans clé (ou si l'API ne répond pas), une heuristique locale explicable prend le relais ; l'analyse est
 alors marquée `is_demo` et le moteur affiché est `heuristique-locale-v1`.
+
+## IA : assistant produit
+
+Sur chaque fiche produit, un consommateur connecté pose une question en langage naturel
+(« Ce produit est-il vraiment bio ? »). `app/Services/ProductAssistant.php` envoie à Claude la fiche
+de traçabilité du produit (producteur, parcours, certifications, empreinte, déclarations, alertes, avis)
+et l'assistant répond uniquement à partir de ces données. Limité à 10 questions par minute.
+
+## Autres fonctionnalités avancées
+
+- QR code de traçabilité par produit (à imprimer sur l'emballage), téléchargeable en SVG
+- Files d'attente (analyse IA des déclarations), tâches planifiées, notifications email
+- Recommandations personnalisées calculées, téléversement de fichiers, tableau de bord avec graphiques
+
+## DevOps
+
+- `Dockerfile` multi-étapes (dépendances Composer, build Vite, PHP 8.3 + Apache) et `docker-compose.yml`
+- CI GitHub Actions (`.github/workflows/ci.yml`) : tests sur PHP 8.2 et 8.3, Pint, audit de sécurité,
+  build front, image Docker publiée sur GHCR à chaque push sur `main`
+- `Jenkinsfile` et `sonar-project.properties` pour une chaîne Jenkins + SonarQube
+- Workflow Git : voir [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Tests
 

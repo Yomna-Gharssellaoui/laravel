@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Http\Events\RequestHandled;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
+use Laravel\Fortify\Features;
+use Laravel\Fortify\Fortify;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Breeze handles login, registration and password reset; Fortify is only used
+        // for its two-factor authentication actions, so its own routes are disabled.
+        Fortify::ignoreRoutes();
     }
 
     /**
@@ -21,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // TOTP two-factor authentication must be confirmed with a first code before it is active
+        config(['fortify.features' => [
+            Features::twoFactorAuthentication(['confirm' => true, 'confirmPassword' => true]),
+        ]]);
+
         // Attach a CSP header to every response; in local environment also allow the Vite dev server.
         Event::listen(RequestHandled::class, function (RequestHandled $event) {
             $response = $event->response;
@@ -34,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
 
             if (app()->isLocal()) {
                 $scriptSrc .= ' http://127.0.0.1:5173';
-                $connectSrc .= " http://127.0.0.1:5173 ws://127.0.0.1:5173";
+                $connectSrc .= ' http://127.0.0.1:5173 ws://127.0.0.1:5173';
             }
 
             $csp = implode('; ', [
@@ -43,7 +52,7 @@ class AppServiceProvider extends ServiceProvider
                 "style-src {$styleSrc}",
                 "connect-src {$connectSrc}",
                 "img-src {$imgSrc}",
-                "font-src https://fonts.bunny.net https://fonts.gstatic.com",
+                'font-src https://fonts.bunny.net https://fonts.gstatic.com',
                 "frame-ancestors 'none'",
             ]);
 

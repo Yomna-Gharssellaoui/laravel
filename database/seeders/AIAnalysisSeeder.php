@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\AIAnalysis;
 use Illuminate\Database\Seeder;
 
 class AIAnalysisSeeder extends Seeder
@@ -12,6 +12,6 @@ class AIAnalysisSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\AIAnalysis::factory()->count(20)->create();
+        AIAnalysis::factory()->count(20)->create();
     }
 }
