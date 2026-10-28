@@ -421,7 +421,7 @@
             <a href="{{ route('producers.index') }}" class="nav-link">Producteurs</a>
             <a href="{{ route('transformers.index') }}" class="nav-link">Transformateurs</a>
             @auth
-                <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="nav-link">{{ auth()->user()->canAccessBackOffice() ? 'Back-office' : 'Mon espace' }}</a>
                 <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                     @csrf
                     <button type="submit" class="btn-primary">Déconnexion</button>

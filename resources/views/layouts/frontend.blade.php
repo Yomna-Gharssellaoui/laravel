@@ -7,47 +7,44 @@
     <title>@yield('title', 'Trace Verte') — Traçabilité alimentaire</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700|fraunces:500,600,700" rel="stylesheet" />
-    <!-- Bootstrap CSS (optional for a professional, opinionated UI) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-[var(--tv-surface)] font-sans antialiased text-slate-800">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
-                <img src="{{ asset('logo.png') }}" alt="Trace Verte Logo" class="rounded-circle border border-success-subtle shadow-sm" style="width:44px;height:44px;object-fit:cover;">
-                <span class="ms-2 fw-semibold text-dark">Trace Verte</span>
+    <header class="sticky top-0 z-40 border-b border-brand-100 bg-white/95 backdrop-blur">
+        <nav class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+            <a href="{{ route('home') }}" class="flex items-center gap-2">
+                <img src="{{ asset('logo.png') }}" alt="" class="h-10 w-10 rounded-full border border-brand-100 object-cover">
+                <span class="font-display text-xl font-semibold text-brand-800">Trace Verte</span>
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 lg:hidden" data-menu-toggle aria-expanded="false" aria-controls="main-menu">Menu</button>
 
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">Accueil</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('products.index') }}">Produits</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('producers.index') }}">Producteurs</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('transformers.index') }}">Transformateurs</a></li>
-                </ul>
+            <div id="main-menu" class="hidden w-full flex-col gap-3 lg:flex lg:w-auto lg:flex-row lg:items-center lg:gap-6" data-menu>
+                <a href="{{ route('products.index') }}" class="text-sm font-medium {{ request()->routeIs('products.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Produits</a>
+                <a href="{{ route('producers.index') }}" class="text-sm font-medium {{ request()->routeIs('producers.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Producteurs</a>
+                <a href="{{ route('transformers.index') }}" class="text-sm font-medium {{ request()->routeIs('transformers.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Transformateurs</a>
 
-                <form class="d-flex me-3" role="search" action="{{ route('products.index') }}" method="GET">
-                    <input class="form-control me-2" type="search" placeholder="Rechercher produit, producteur, code-barre" aria-label="Search" name="q">
-                    <button class="btn btn-success" type="submit">Rechercher</button>
+                <form action="{{ route('products.index') }}" method="GET" class="flex" role="search">
+                    <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher un produit…" aria-label="Rechercher" class="tv-input w-full lg:w-56">
                 </form>
 
-                <div class="d-flex gap-2">
-                    @auth
-                        <a href="{{ route('consumer.profile') }}" class="btn btn-outline-secondary d-none d-sm-inline">{{ auth()->user()->name }}</a>
-                        <form method="POST" action="{{ route('logout') }}">@csrf<button class="btn btn-outline-danger" type="submit">Déconnexion</button></form>
-                    @else
-                        <a href="{{ route('login') }}" class="btn btn-outline-primary">Connexion</a>
-                        <a href="{{ route('register') }}" class="btn btn-success">Inscription</a>
-                    @endauth
-                </div>
+                @auth
+                    @if(auth()->user()->canAccessBackOffice())
+                        <a href="{{ route('admin.dashboard') }}" class="text-sm font-medium text-slate-600 hover:text-brand-700">Back-office</a>
+                    @endif
+                    <a href="{{ route('consumer.profile') }}" class="text-sm font-medium {{ request()->routeIs('consumer.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Mon espace</a>
+                    <a href="{{ route('profile.edit') }}" class="text-sm font-medium text-slate-600 hover:text-brand-700">Mon compte</a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="tv-btn-secondary">Déconnexion</button>
+                    </form>
+                @else
+                    <a href="{{ route('login') }}" class="tv-btn-secondary">Connexion</a>
+                    <a href="{{ route('register') }}" class="tv-btn-primary">Inscription</a>
+                @endauth
             </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
     <main>
         <x-flash-messages />
@@ -75,7 +72,16 @@
         </div>
         <div class="border-t border-brand-700/60 px-4 py-4 text-center text-xs text-brand-200">© {{ date('Y') }} Trace Verte</div>
     </footer>
-    <!-- Bootstrap JS bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        (() => {
+            const toggle = document.querySelector('[data-menu-toggle]');
+            const menu = document.querySelector('[data-menu]');
+            toggle?.addEventListener('click', () => {
+                const open = menu.classList.toggle('hidden') === false;
+                menu.classList.toggle('flex', open);
+                toggle.setAttribute('aria-expanded', open);
+            });
+        })();
+    </script>
 </body>
 </html>

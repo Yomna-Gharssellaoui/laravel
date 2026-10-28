@@ -1,105 +1,47 @@
 @extends('layouts.frontend')
 
-@section('title', 'Mon profil')
+@section('title', 'Mon espace')
 
 @section('content')
-    <section class="py-5 bg-light">
-        <div class="container py-5">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-                <div>
-                    <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2 text-uppercase fw-semibold">Profil</span>
-                    <h1 class="mt-4 display-5 fw-bold text-dark mb-0">Mon espace consommateur</h1>
-                </div>
-                <a href="{{ route('consumer.recommendations') }}" class="btn btn-success btn-lg">Voir mes recommandations</a>
-            </div>
+    <x-page-header eyebrow="Mon espace" :title="'Bonjour '.auth()->user()->name" subtitle="Vos préférences servent à calculer des recommandations de produits adaptées à vous." />
 
-            <div class="row g-4">
-                <div class="col-lg-5">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-4 p-lg-5">
-                            <h2 class="h4 fw-bold text-dark mb-4">Informations</h2>
-                            <div class="list-group list-group-flush rounded-4 border">
-                                <div class="list-group-item px-0 py-3">
-                                    <small class="text-uppercase text-muted">Nom</small>
-                                    <div class="fw-semibold mt-1 text-dark">{{ auth()->user()->name }}</div>
-                                </div>
-                                <div class="list-group-item px-0 py-3">
-                                    <small class="text-uppercase text-muted">Email</small>
-                                    <div class="fw-semibold mt-1 text-dark">{{ auth()->user()->email }}</div>
-                                </div>
-                                <div class="list-group-item px-0 py-3">
-                                    <small class="text-uppercase text-muted">Niveau de durabilité</small>
-                                    <div class="fw-semibold mt-1 text-dark">{{ $consumer->sustainability_level ?? '—' }}</div>
-                                </div>
-                                <div class="list-group-item px-0 py-3 border-0">
-                                    <small class="text-uppercase text-muted">Budget</small>
-                                    <div class="fw-semibold mt-1 text-dark">{{ $consumer->budget_range ?? '—' }}</div>
-                                </div>
-                            </div>
-                            <div class="mt-4">
-                                <a href="{{ route('consumer.edit') }}" class="btn btn-outline-secondary">Modifier mes préférences</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-7">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-4 p-lg-5">
-                            <h2 class="h4 fw-bold text-dark mb-4">Préférences</h2>
-                            <div class="d-flex flex-wrap gap-2">
-                                @forelse($consumer->preferences ?? [] as $pref)
-                                    <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2">{{ $pref }}</span>
-                                @empty
-                                    <p class="text-secondary mb-0">Aucune préférence renseignée pour le moment.</p>
-                                @endforelse
-                            </div>
-
-                            <div class="row g-4 mt-2">
-                                <div class="col-md-6">
-                                    <div class="border rounded-4 p-3 h-100">
-                                        <small class="text-uppercase text-muted">Restrictions alimentaires</small>
-                                        <p class="mb-0 mt-2 text-dark">{{ empty($consumer->dietary_restrictions ?? []) ? 'Aucune' : implode(', ', $consumer->dietary_restrictions) }}</p>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="border rounded-4 p-3 h-100">
-                                        <small class="text-uppercase text-muted">Allergies</small>
-                                        <p class="mb-0 mt-2 text-dark">{{ empty($consumer->allergies ?? []) ? 'Aucune' : implode(', ', $consumer->allergies) }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="mb-6 flex flex-wrap gap-3">
+            <a href="{{ route('consumer.recommendations') }}" class="tv-btn-primary">Voir mes recommandations</a>
+            <a href="{{ route('consumer.edit') }}" class="tv-btn-secondary">Modifier mes préférences</a>
+            <a href="{{ route('profile.edit') }}" class="tv-btn-secondary">Mon compte (email, mot de passe)</a>
         </div>
-    </section>
 
-    <section class="container pb-5">
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4 p-lg-5">
-                <h2 class="h4 fw-bold text-dark mb-4">Mes évaluations</h2>
-                @if($consumer->personalRatings->isEmpty())
-                    <x-empty-state title="Aucune évaluation" message="Les recommandations personnalisées apparaîtront ici lorsque vous aurez évalué des produits." />
-                @else
-                    <div class="row g-3">
-                        @foreach($consumer->personalRatings as $rating)
-                            <div class="col-12">
-                                <div class="border rounded-4 p-3">
-                                    <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
-                                        <div>
-                                            <div class="fw-semibold text-dark">{{ $rating->product?->name ?? 'Produit' }}</div>
-                                            <small class="text-muted">Score personnalisé : {{ $rating->personalized_score }}/100</small>
-                                        </div>
-                                        <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2">{{ $rating->personalized_score }}%</span>
-                                    </div>
-                                    <p class="mb-0 mt-3 text-secondary">{{ $rating->recommendation_reason ?? 'Aucune raison détaillée.' }}</p>
-                                </div>
-                            </div>
-                        @endforeach
+        <div class="grid gap-6 lg:grid-cols-3">
+            <div class="tv-card">
+                <h2 class="tv-section-title">Informations</h2>
+                <dl class="space-y-4 text-sm">
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-500">Nom</dt><dd class="mt-1 font-semibold text-slate-800">{{ auth()->user()->name }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-500">Email</dt><dd class="mt-1 font-semibold text-slate-800">{{ auth()->user()->email }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-500">Niveau de durabilité</dt><dd class="mt-1 font-semibold text-slate-800">{{ $consumer->sustainability_level ?? '—' }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-500">Budget</dt><dd class="mt-1 font-semibold text-slate-800">{{ $consumer->budget_range ?? '—' }}</dd></div>
+                </dl>
+            </div>
+
+            <div class="tv-card lg:col-span-2">
+                <h2 class="tv-section-title">Préférences</h2>
+                <div class="flex flex-wrap gap-2">
+                    @forelse($consumer->preferences ?? [] as $pref)
+                        <span class="rounded-full bg-brand-100 px-3 py-1 text-sm font-medium text-brand-800">{{ \App\Models\Consumer::PREFERENCES[$pref] ?? $pref }}</span>
+                    @empty
+                        <p class="text-sm text-slate-600">Aucune préférence renseignée pour le moment.</p>
+                    @endforelse
+                </div>
+                <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                    <div class="rounded-xl border border-slate-200 p-4">
+                        <p class="text-xs uppercase tracking-wide text-slate-500">Restrictions alimentaires</p>
+                        <p class="mt-2 text-slate-800">{{ implode(', ', $consumer->dietary_restrictions ?? []) ?: 'Aucune' }}</p>
                     </div>
-                @endif
+                    <div class="rounded-xl border border-slate-200 p-4">
+                        <p class="text-xs uppercase tracking-wide text-slate-500">Allergies</p>
+                        <p class="mt-2 text-slate-800">{{ implode(', ', $consumer->allergies ?? []) ?: 'Aucune' }}</p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>

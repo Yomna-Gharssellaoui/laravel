@@ -3,62 +3,27 @@
 @section('title', $transformer->company_name)
 
 @section('content')
-    <section class="py-5 bg-light">
-        <div class="container py-4">
-            <div class="d-flex flex-wrap gap-3 align-items-center mb-4">
-                <a href="{{ route('transformers.index') }}" class="btn btn-outline-secondary">Retour</a>
-            </div>
+    <x-page-header eyebrow="Transformateur" :title="$transformer->company_name" :subtitle="$transformer->location">
+        <a href="{{ route('transformers.index') }}" class="tv-btn-secondary mb-6">← Retour</a>
+    </x-page-header>
 
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="bg-gradient-to-r from-primary to-success p-4 p-lg-5 text-white">
-                    <span class="badge rounded-pill bg-white text-primary px-3 py-2 mb-3">Transformateur</span>
-                    <h1 class="display-6 fw-bold mb-0">{{ $transformer->company_name }}</h1>
-                </div>
-                <div class="card-body p-4 p-lg-5">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="list-group list-group-flush rounded-4 border">
-                                <div class="list-group-item px-3 py-3">
-                                    <small class="text-uppercase text-muted">Localisation</small>
-                                    <div class="fw-semibold mt-1 text-dark">{{ $transformer->location ?? '—' }}</div>
-                                </div>
-                                <div class="list-group-item px-3 py-3">
-                                    <small class="text-uppercase text-muted">Type</small>
-                                    <div class="fw-semibold mt-1 text-dark">{{ $transformer->transformation_type ?? '—' }}</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="list-group list-group-flush rounded-4 border">
-                                <div class="list-group-item px-3 py-3">
-                                    <small class="text-uppercase text-muted">Capacité</small>
-                                    <div class="fw-semibold mt-1 text-dark">{{ $transformer->production_capacity ?? '—' }}</div>
-                                </div>
-                                <div class="list-group-item px-3 py-3">
-                                    <small class="text-uppercase text-muted">Produits</small>
-                                    <div class="fw-semibold mt-1 text-dark">{{ $transformer->products()->where('status', 'published')->count() }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="container pb-5">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <h2 class="fw-bold text-dark mb-0">Produits transformés</h2>
+    <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div class="tv-card">
+            <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div><dt class="text-xs uppercase tracking-wide text-slate-500">Localisation</dt><dd class="mt-1 font-semibold text-slate-800">{{ $transformer->location ?? '—' }}</dd></div>
+                <div><dt class="text-xs uppercase tracking-wide text-slate-500">Type de transformation</dt><dd class="mt-1 font-semibold text-slate-800">{{ $transformer->transformation_type ?? '—' }}</dd></div>
+                <div><dt class="text-xs uppercase tracking-wide text-slate-500">Capacité</dt><dd class="mt-1 font-semibold text-slate-800">{{ $transformer->production_capacity ?? '—' }}</dd></div>
+                <div><dt class="text-xs uppercase tracking-wide text-slate-500">Certifications</dt><dd class="mt-1 font-semibold text-slate-800">{{ implode(', ', $transformer->certifications ?? []) ?: '—' }}</dd></div>
+            </dl>
         </div>
 
+        <h2 class="mt-10 mb-6 font-display text-2xl font-semibold text-brand-900">Produits associés</h2>
         @if($transformer->products->isEmpty())
-            <x-empty-state title="Aucun produit" message="Ce transformateur n’a pas encore de produits publiés." />
+            <x-empty-state title="Aucun produit" message="Aucun produit publié pour le moment." />
         @else
-            <div class="row g-4">
+            <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach($transformer->products as $product)
-                    <div class="col-md-6 col-xl-4">
-                        <x-product-card :product="$product" />
-                    </div>
+                    <x-product-card :product="$product" />
                 @endforeach
             </div>
         @endif
