@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Producer;
+use App\Models\Product;
+use App\Models\Transformer;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
@@ -12,12 +14,12 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $producers = \App\Models\Producer::all();
-        $transformers = \App\Models\Transformer::all();
+        $producers = Producer::all();
+        $transformers = Transformer::all();
 
         if ($producers->isEmpty()) {
-            \App\Models\Producer::factory()->count(12)->withUser()->create();
-            $producers = \App\Models\Producer::all();
+            Producer::factory()->count(12)->withUser()->create();
+            $producers = Producer::all();
         }
 
         // Create a mix of published and draft products tied to existing producers/transformers.
@@ -25,7 +27,7 @@ class ProductSeeder extends Seeder
             $producer = $producers->random();
             $transformer = $transformers->isNotEmpty() && rand(0, 100) < 70 ? $transformers->random() : null;
 
-            \App\Models\Product::factory()
+            Product::factory()
                 ->for($producer, 'producer')
                 ->state([
                     'transformer_id' => $transformer?->id,

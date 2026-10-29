@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Services\RecommendationEngine;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -11,15 +11,14 @@ class DatabaseSeeder extends Seeder
     use WithoutModelEvents;
 
     /**
-     * Seed the application's database.
+     * Seed the application's database with the Trace Verte demo dataset.
+     * Accounts and test scenarios: docs/GUIDE-DE-TEST.md (password: "password").
      */
     public function run(): void
     {
-        // For a clean demo environment overwrite default seeding
-        // Run the French demo seeder which resets selected tables
-        $this->call([
-            FrenchDemoSeeder::class,
-            M5DemoSeeder::class,
-        ]);
+        $this->call(TraceVerteDatasetSeeder::class);
+
+        // Personalised scores for every consumer profile
+        app(RecommendationEngine::class)->recomputeAll();
     }
 }

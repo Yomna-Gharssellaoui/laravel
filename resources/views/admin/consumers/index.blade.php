@@ -13,7 +13,6 @@
         <a href="{{ route('admin.consumers.create') }}" class="tv-btn-primary">Ajouter</a>
     </div>
 
-    <x-flash-messages />
 
     <div class="tv-card overflow-hidden p-0">
         <div class="overflow-x-auto">
@@ -39,7 +38,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ count($cfg['columns']) + 1 }}">
+                            <td colspan="100">
                                 <x-empty-state title="Aucun consommateur" message="Commencez par créer une entrée." />
                             </td>
                         </tr>

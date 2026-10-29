@@ -2,7 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\EnvironmentalFootprint;
+use App\Models\Product;
 use Illuminate\Database\Seeder;
 
 class EnvironmentalFootprintSeeder extends Seeder
@@ -12,11 +13,12 @@ class EnvironmentalFootprintSeeder extends Seeder
      */
     public function run(): void
     {
-        $products = \App\Models\Product::where('status', 'published')->get();
+        $products = Product::where('status', 'published')->get();
 
         if ($products->isEmpty()) {
             // Fallback: create some footprints normally
-            \App\Models\EnvironmentalFootprint::factory()->count(12)->create();
+            EnvironmentalFootprint::factory()->count(12)->create();
+
             return;
         }
 
@@ -25,7 +27,7 @@ class EnvironmentalFootprintSeeder extends Seeder
                 continue;
             }
 
-            \App\Models\EnvironmentalFootprint::factory()
+            EnvironmentalFootprint::factory()
                 ->for($product, 'product')
                 ->create();
         }

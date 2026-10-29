@@ -10,27 +10,28 @@
             
             <button class="tv-btn-secondary" type="submit">Filtrer</button>
         </form>
-        <a href="{{ route('admin.ai-analyses.create') }}" class="tv-btn-primary">Ajouter</a>
+        <p class="text-sm {{ $aiEnabled ? 'text-emerald-700' : 'text-amber-700' }}">
+            {{ $aiEnabled ? 'Analyse par IA active ('.$modelName.').' : 'Mode heuristique : ajoutez GEMINI_API_KEY ou ANTHROPIC_API_KEY dans .env pour activer l’IA.' }}
+            Lancez une analyse depuis une déclaration ou un produit.
+        </p>
     </div>
 
-    <x-flash-messages />
 
     <div class="tv-card overflow-hidden p-0">
         <div class="overflow-x-auto">
             <table class="tv-table">
                 <thead>
                     <tr>
-                        <th>Produit</th><th>Type</th><th>Score greenwashing</th><th>Démo</th>
+                        <th>Produit</th><th>Type</th><th>Risque greenwashing</th><th>Crédibilité</th><th>Moteur</th><th>Date</th>
                         <th class="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($items as $item)
                         <tr>
-                            <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->analysis_type ?? '—' }}</td><td>{{ $item->greenwashing_score ?? '—' }}</td><td>{{ $item->is_demo ?? '—' }}</td>
+                            <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->analysis_type ?? '—' }}</td><td>{{ $item->greenwashing_score ?? '—' }}/100</td><td>{{ $item->credibility_rating ?? '—' }}</td><td>{{ $item->is_demo ? 'heuristique' : 'IA' }}</td><td>{{ $item->created_at?->format('d/m/Y') }}</td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.ai-analyses.show', $item) }}" class="tv-link">Voir</a>
-                                <a href="{{ route('admin.ai-analyses.edit', $item) }}" class="tv-link ml-2">Modifier</a>
                                 <form action="{{ route('admin.ai-analyses.destroy', $item) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Confirmer la suppression ?');">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:underline text-sm">Supprimer</button>
@@ -39,8 +40,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ count($cfg['columns']) + 1 }}">
-                                <x-empty-state title="Aucun analyse" message="Commencez par créer une entrée." />
+                            <td colspan="100">
+                                <x-empty-state title="Aucune analyse" message="Cliquez sur « Relancer l’analyse IA » depuis une déclaration environnementale." />
                             </td>
                         </tr>
                     @endforelse

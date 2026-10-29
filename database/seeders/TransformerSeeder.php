@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Transformer;
 use Illuminate\Database\Seeder;
 
 class TransformerSeeder extends Seeder
@@ -12,7 +12,7 @@ class TransformerSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Transformer::factory()
+        Transformer::factory()
             ->count(6)
             ->withUser()
             ->create();

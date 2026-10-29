@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class ProductController extends Controller
@@ -66,5 +68,18 @@ class ProductController extends Controller
         ]);
 
         return view('frontend.products.trace', compact('product'));
+    }
+
+    /**
+     * Downloadable QR code (SVG) of the traceability page, for labels and packaging.
+     */
+    public function qrCode(Product $product): Response
+    {
+        abort_unless($product->status === 'published', 404);
+
+        return response($product->traceQrCodeSvg(600), 200, [
+            'Content-Type' => 'image/svg+xml',
+            'Content-Disposition' => 'attachment; filename="qr-'.Str::slug($product->name).'.svg"',
+        ]);
     }
 }

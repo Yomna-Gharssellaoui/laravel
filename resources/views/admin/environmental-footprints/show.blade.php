@@ -4,7 +4,6 @@
 @section('page-title', 'Détail empreinte')
 
 @section('content')
-    <x-flash-messages />
     <div class="flex gap-3 mb-6">
         <a href="{{ route('admin.environmental-footprints.edit', $item) }}" class="tv-btn-primary">Modifier</a>
         <a href="{{ route('admin.environmental-footprints.index') }}" class="tv-btn-secondary">Retour</a>
@@ -17,9 +16,10 @@
     <div class="tv-card">
         <dl class="tv-dl">
             <div><dt>Produit</dt><dd>{{ $item->product?->name ?? '—' }}</dd></div>
-<div><dt>CO₂ (kg)</dt><dd>{{ $item->co2_emissions ?? '—' }}</dd></div>
-<div><dt>Eau (L)</dt><dd>{{ $item->water_usage ?? '—' }}</dd></div>
-<div><dt>Score</dt><dd>{{ $item->ai_score ?? '—' }}</dd></div>
+<div><dt>CO₂</dt><dd>{{ $item->co2_emissions !== null ? $item->co2_emissions.' kg CO₂e/kg' : '—' }}</dd></div>
+<div><dt>Eau</dt><dd>{{ $item->water_usage !== null ? $item->water_usage.' L/kg' : '—' }}</dd></div>
+<div><dt>Sols</dt><dd>{{ $item->land_usage !== null ? $item->land_usage.' m²/kg' : '—' }}</dd></div>
+<div><dt>Score calculé</dt><dd>{{ $item->ai_score ?? '—' }}/100 ({{ $item->indicatorLevel() }})</dd></div>
 
         </dl>
     </div>

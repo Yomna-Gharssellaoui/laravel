@@ -2,21 +2,26 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\ParsesCsv;
 use App\Http\Controllers\Controller;
 use App\Models\Transformer;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class TransformerController extends Controller
 {
+    use ParsesCsv;
+
     public function index(Request $request): View
     {
         $items = Transformer::with('user')
             ->withCount('products')
-            ->when($request->q, fn ($q) => $q->where('company_name', 'like', '%'.$request->q.'%')
-                ->orWhere('location', 'like', '%'.$request->q.'%'))
+            ->when($request->q, fn ($q) => $q->where(fn ($query) => $query
+                ->where('company_name', 'like', '%'.$request->q.'%')
+                ->orWhere('location', 'like', '%'.$request->q.'%')))
             ->latest()
             ->paginate(12)
             ->withQueryString();
@@ -27,7 +32,7 @@ class TransformerController extends Controller
     public function create(): View
     {
         return view('admin.transformers.create', [
-            'users' => User::where('role', 'transformer')->orderBy('name')->get(),
+            'users' => $this->availableUsers(),
         ]);
     }
 
@@ -50,13 +55,13 @@ class TransformerController extends Controller
     {
         return view('admin.transformers.edit', [
             'item' => $transformer,
-            'users' => User::where('role', 'transformer')->orderBy('name')->get(),
+            'users' => $this->availableUsers($transformer),
         ]);
     }
 
     public function update(Request $request, Transformer $transformer): RedirectResponse
     {
-        $transformer->update($this->validated($request));
+        $transformer->update($this->validated($request, $transformer));
 
         return redirect()->route('admin.transformers.show', $transformer)
             ->with('success', 'Transformateur mis à jour.');
@@ -70,10 +75,25 @@ class TransformerController extends Controller
             ->with('success', 'Transformateur supprimé.');
     }
 
-    private function validated(Request $request): array
+    /**
+     * Accounts with the transformer role that are not yet linked to another company.
+     */
+    private function availableUsers(?Transformer $current = null)
+    {
+        return User::where('role', 'transformer')
+            ->where(fn ($q) => $q->whereDoesntHave('transformer')->orWhere('id', $current?->user_id ?? 0))
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function validated(Request $request, ?Transformer $transformer = null): array
     {
         $data = $request->validate([
-            'user_id' => ['nullable', 'exists:users,id'],
+            'user_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where('role', 'transformer'),
+                Rule::unique('transformers', 'user_id')->ignore($transformer),
+            ],
             'company_name' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
@@ -84,11 +104,7 @@ class TransformerController extends Controller
             'certifications' => ['nullable', 'string'],
         ]);
 
-        if (isset($data['certifications'])) {
-            $data['certifications'] = $data['certifications'] === ''
-                ? null
-                : array_values(array_filter(array_map('trim', explode(',', $data['certifications']))));
-        }
+        $data['certifications'] = $this->csvToArray($data['certifications'] ?? null);
 
         return $data;
     }

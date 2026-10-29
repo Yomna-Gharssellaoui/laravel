@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\PersonalRating;
 use Illuminate\Database\Seeder;
 
 class PersonalRatingSeeder extends Seeder
@@ -12,6 +12,6 @@ class PersonalRatingSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\PersonalRating::factory()->count(30)->create();
+        PersonalRating::factory()->count(30)->create();
     }
 }

@@ -7,12 +7,17 @@
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <form method="GET" class="flex flex-wrap gap-2">
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher…" class="tv-input w-56">
+            <select name="status" class="tv-input">
+                <option value="">Tous les statuts</option>
+                @foreach(\App\Models\ComplianceCheck::STATUSES as $st)
+                    <option value="{{ $st }}" @selected(request('status') === $st)>{{ $st }}</option>
+                @endforeach
+            </select>
             <button class="tv-btn-secondary" type="submit">Filtrer</button>
         </form>
         <a href="{{ route('admin.compliance-checks.create') }}" class="tv-btn-primary">Ajouter</a>
     </div>
 
-    <x-flash-messages />
 
     <div class="tv-card overflow-hidden p-0">
         <div class="overflow-x-auto">

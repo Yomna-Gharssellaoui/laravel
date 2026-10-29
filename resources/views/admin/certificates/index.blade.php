@@ -15,36 +15,41 @@
             </select>
             <button class="tv-btn-secondary" type="submit">Filtrer</button>
         </form>
-        <a href="{{ route('admin.certificates.create') }}" class="tv-btn-primary">Ajouter</a>
+        @can('create', \App\Models\Certificate::class)
+            <a href="{{ route('admin.certificates.create') }}" class="tv-btn-primary">Ajouter</a>
+        @endcan
     </div>
 
-    <x-flash-messages />
 
     <div class="tv-card overflow-hidden p-0">
         <div class="overflow-x-auto">
             <table class="tv-table">
                 <thead>
                     <tr>
-                        <th>Produit</th><th>Type</th><th>Émetteur</th><th>Statut</th>
+                        <th>Produit</th><th>Type</th><th>Émetteur</th><th>Statut</th><th>Expiration</th>
                         <th class="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($items as $item)
                         <tr>
-                            <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->certificate_type ?? '—' }}</td><td>{{ $item->issuer ?? '—' }}</td><td><x-status-badge :status="$item->status ?? '—'" /></td>
+                            <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->certificate_type ?? '—' }}</td><td>{{ $item->issuer ?? '—' }}</td><td><x-status-badge :status="$item->status ?? '—'" /></td><td><x-expiry-badge :certificate="$item" /></td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.certificates.show', $item) }}" class="tv-link">Voir</a>
+                                @can('update', $item)
                                 <a href="{{ route('admin.certificates.edit', $item) }}" class="tv-link ml-2">Modifier</a>
+                                @endcan
+                                @can('delete', $item)
                                 <form action="{{ route('admin.certificates.destroy', $item) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Confirmer la suppression ?');">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:underline text-sm">Supprimer</button>
                                 </form>
+                                @endcan
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ count($cfg['columns']) + 1 }}">
+                            <td colspan="100">
                                 <x-empty-state title="Aucun certification" message="Commencez par créer une entrée." />
                             </td>
                         </tr>

@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ConsumerPreferencesRequest;
 use App\Models\Consumer;
 use App\Models\PersonalRating;
-use App\Models\Product;
+use App\Services\RecommendationEngine;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -26,60 +27,38 @@ class ConsumerController extends Controller
         return view('frontend.consumer.edit', compact('consumer'));
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(ConsumerPreferencesRequest $request, RecommendationEngine $engine): RedirectResponse
     {
         $consumer = $this->resolveConsumer($request, true);
 
-        $data = $request->validate([
-            'preferences' => ['nullable', 'string'],
-            'sustainability_level' => ['nullable', 'string', 'max:50'],
-            'dietary_restrictions' => ['nullable', 'string'],
-            'allergies' => ['nullable', 'string'],
-            'budget_range' => ['nullable', 'string', 'max:50'],
-        ]);
+        $consumer->update($request->preferences());
 
-        foreach (['preferences', 'dietary_restrictions', 'allergies'] as $field) {
-            $value = $data[$field] ?? null;
-            $data[$field] = ($value === null || trim($value) === '')
-                ? null
-                : array_values(array_filter(array_map('trim', explode(',', $value))));
-        }
-
-        $consumer->update($data);
+        // Preferences changed: refresh the personalised scores straight away
+        $engine->recompute($consumer);
 
         return redirect()->route('consumer.profile')
-            ->with('success', 'Préférences mises à jour.');
+            ->with('success', 'Préférences mises à jour, vos recommandations ont été recalculées.');
     }
 
-    public function recommendations(Request $request): View
+    public function recommendations(Request $request, RecommendationEngine $engine): View
     {
         $consumer = $this->resolveConsumer($request, true);
-        $preferences = collect($consumer->preferences ?? []);
+
+        if (! $consumer->personalRatings()->exists()) {
+            $engine->recompute($consumer);
+        }
 
         $ratings = PersonalRating::with(['product.environmentalFootprint', 'product.producer'])
             ->where('consumer_id', $consumer->id)
+            ->whereHas('product', fn ($q) => $q->where('status', 'published'))
             ->orderByDesc('personalized_score')
             ->get();
 
-        $suggested = Product::with('environmentalFootprint')
-            ->where('status', 'published')
-            ->when($preferences->isNotEmpty(), function ($q) use ($preferences) {
-                $q->where(function ($query) use ($preferences) {
-                    if ($preferences->contains('bio')) {
-                        $query->orWhereHas('certificates', fn ($c) => $c->where('certificate_type', 'like', '%Bio%'));
-                    }
-                    if ($preferences->contains('faible_co2')) {
-                        $query->orWhereHas('environmentalFootprint', fn ($f) => $f->where('co2_emissions', '<', 5));
-                    }
-                    if ($preferences->contains('local')) {
-                        $query->orWhere('origin', 'like', '%France%');
-                    }
-                });
-            })
-            ->take(8)
-            ->get();
-
-        return view('frontend.consumer.recommendations', compact('consumer', 'ratings', 'suggested'));
+        return view('frontend.consumer.recommendations', [
+            'consumer' => $consumer,
+            'recommended' => $ratings->where('personalized_score', '>', 0)->take(12),
+            'excluded' => $ratings->where('personalized_score', 0),
+        ]);
     }
 
     private function resolveConsumer(Request $request, bool $create = false): Consumer

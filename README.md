@@ -1,59 +1,157 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Trace Verte
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Plateforme de traçabilité alimentaire : chaque produit est suivi du producteur au distributeur,
+avec son empreinte environnementale, ses certifications, ses déclarations environnementales et
+une détection du greenwashing par IA.
 
-## About Laravel
+Laravel 12 · Breeze (Blade) · Tailwind (back-office) · Bootstrap (site public) · SQLite par défaut.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Installation
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+touch database/database.sqlite
+php artisan migrate --seed
+php artisan storage:link
+npm install && npm run build
+composer dev   # serveur + worker de file d'attente + logs + Vite
+```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Avec Docker (app + file d'attente + planificateur + MySQL + Mailpit)
 
-## Learning Laravel
+```bash
+cp .env.example .env        # puis renseigner APP_KEY (php artisan key:generate --show)
+docker compose up -d --build
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- Application : http://localhost:8000
+- Emails envoyés (vérification, mot de passe oublié, alertes) : http://localhost:8025
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Recevoir les emails en local sans Docker
 
-## Laravel Sponsors
+Par défaut (`MAIL_MAILER=log`) les emails sont écrits dans `storage/logs/laravel.log`.
+Pour les recevoir réellement, utilisez un compte gratuit [Mailtrap](https://mailtrap.io) (Email Testing)
+et copiez ses identifiants SMTP dans `.env` :
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=sandbox.smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=...
+MAIL_PASSWORD=...
+```
 
-### Premium Partners
+Tâches planifiées (expiration des certifications, alertes automatiques) :
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+php artisan schedule:work          # en local
+php artisan traceverte:scan-alerts # exécution manuelle
+```
 
-## Contributing
+## Jeu de données et guide de test
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+`php artisan migrate:fresh --seed` charge un jeu de données cohérent (produits tunisiens) avec tous les
+cas à démontrer. Les scénarios de test, module par module, sont dans [docs/GUIDE-DE-TEST.md](docs/GUIDE-DE-TEST.md).
 
-## Code of Conduct
+## Comptes de démonstration
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Mot de passe : `password`
 
-## Security Vulnerabilities
+| Email | Rôle | Accès |
+|---|---|---|
+| admin@traceverte.test | admin | tout le back-office |
+| producer@traceverte.test | producer | ses produits, leurs certifications et traces |
+| transformer@traceverte.test | transformer | les produits qu'il transforme |
+| distributor@traceverte.test | distributor | les traces logistiques qu'il assure |
+| producer2@traceverte.test | producer | un autre producteur (dattes) |
+| consumer@traceverte.test | consumer | site public, avis, recommandations |
+| sara@traceverte.test | consumer | allergique au gluten |
+| nouveau@traceverte.test | consumer | email non vérifié |
+| bloque@traceverte.test | consumer | compte suspendu |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Rôles et permissions
 
-## License
+- Rôles stockés dans `users.role` ; le rôle n'est **pas** assignable en masse : seul un admin le change.
+- Routes protégées par les middlewares `auth`, `verified` (MustVerifyEmail), `active` (comptes suspendus) et `role:...`.
+- Produits, certifications et traces sont partagés avec les acteurs de la chaîne : l'accès est contrôlé
+  par les policies `ProductPolicy`, `CertificatePolicy` et `SupplyChainTracePolicy`, et les listes sont
+  filtrées par `Product::visibleTo($user)`.
+- Un producteur ne peut pas valider ses propres certifications (statut forcé à `pending`).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Modules du back-office
+
+| Module | Fonctionnalités |
+|---|---|
+| Utilisateurs | CRUD, changement de rôle, suspension, renvoi de l'email de vérification |
+| Produits | CRUD, image, filtres, publication bloquée sans empreinte ni certification, analyse IA |
+| Empreintes | CO₂ / eau / sols ; score 0-100 **calculé** (CO₂ 50 %, eau 30 %, sols 20 %) |
+| Déclarations | CRUD, justificatif PDF/image, analyse de greenwashing lancée automatiquement (file d'attente) |
+| Conformité | Produit repris de la déclaration ; `failed` ⇒ alerte + déclaration rejetée, `passed` ⇒ validée |
+| Producteurs / Transformateurs / Distributeurs | CRUD, compte lié unique et du bon rôle |
+| Traces logistiques | Étapes datées avec GPS, position actuelle et distance (Haversine) calculées |
+| Certifications | CRUD, document, numéro unique par émetteur, badge d'expiration, expiration automatique |
+| Alertes | CRUD, lien vers la vérification, résolution obligatoire à la clôture, email aux admins (high/critical), alertes automatiques |
+| Avis | Rédigés par les consommateurs sur le site, modérés (approuver / refuser) dans le back-office |
+| Analyses IA | Générées par `GreenwashingAnalyzer`, jamais saisies à la main |
+| Consommateurs / Recommandations | Préférences fixes, allergies ; scores calculés par `RecommendationEngine` |
+
+## Gestion des utilisateurs
+
+| Exigence | Implémentation |
+|---|---|
+| Inscription, connexion, déconnexion | Laravel Breeze, routes protégées par `auth` |
+| Mot de passe oublié | Lien par email, jeton valable 60 minutes |
+| Vérification d'email | `MustVerifyEmail` + middleware `verified` |
+| Rôles | admin, producer, transformer, distributor, consumer ; middleware `role`, policies, contrôle serveur |
+| 2FA | TOTP via Laravel **Fortify** : QR code, confirmation par un premier code, 8 codes de récupération, activation et désactivation par l'utilisateur, étape de code à la connexion |
+| Profil | Nom, email, mot de passe, **photo de profil**, suppression du compte |
+| Administration | CRUD des comptes, changement de rôle, suspension, renvoi de l'email de vérification |
+
+Messages de validation et emails en français (`lang/fr`).
+
+## IA : détection du greenwashing
+
+`app/Services/GreenwashingAnalyzer.php` envoie la déclaration et ses preuves (certifications, empreinte,
+vérifications) au modèle d'IA et reçoit une réponse JSON structurée (score de risque, crédibilité,
+résumé, signaux d'alerte).
+
+Deux fournisseurs sont pris en charge (`app/Services/Ai`), au choix dans `.env` :
+
+| Fournisseur | Variables | Clé |
+|---|---|---|
+| Google Gemini | `GEMINI_API_KEY`, `GEMINI_MODEL` (défaut `gemini-3.8-flash`) | gratuite sur https://aistudio.google.com/apikey |
+| Anthropic Claude | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (défaut `claude-opus-5-5`) | https://console.anthropic.com |
+
+`AI_PROVIDER=auto` utilise le premier fournisseur qui a une clé ; `gemini` ou `anthropic` en impose un.
+
+Sans clé (ou si l'API ne répond pas), une heuristique locale explicable prend le relais ; l'analyse est
+alors marquée `is_demo` et le moteur affiché est `heuristique-locale-v1`.
+
+## IA : assistant produit
+
+Sur chaque fiche produit, un consommateur connecté pose une question en langage naturel
+(« Ce produit est-il vraiment bio ? »). `app/Services/ProductAssistant.php` envoie à Claude la fiche
+de traçabilité du produit (producteur, parcours, certifications, empreinte, déclarations, alertes, avis)
+et l'assistant répond uniquement à partir de ces données. Limité à 10 questions par minute.
+
+## Autres fonctionnalités avancées
+
+- QR code de traçabilité par produit (à imprimer sur l'emballage), téléchargeable en SVG
+- Files d'attente (analyse IA des déclarations), tâches planifiées, notifications email
+- Recommandations personnalisées calculées, téléversement de fichiers, tableau de bord avec graphiques
+
+## DevOps
+
+- `Dockerfile` multi-étapes (dépendances Composer, build Vite, PHP 8.3 + Apache) et `docker-compose.yml`
+- CI GitHub Actions (`.github/workflows/ci.yml`) : tests sur PHP 8.2 et 8.3, Pint, audit de sécurité,
+  build front, image Docker publiée sur GHCR à chaque push sur `main`
+- `Jenkinsfile` et `sonar-project.properties` pour une chaîne Jenkins + SonarQube
+- Workflow Git : voir [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Tests
+
+```bash
+php artisan test
+```

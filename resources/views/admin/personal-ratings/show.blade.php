@@ -4,9 +4,7 @@
 @section('page-title', 'Détail évaluation')
 
 @section('content')
-    <x-flash-messages />
     <div class="flex gap-3 mb-6">
-        <a href="{{ route('admin.personal-ratings.edit', $item) }}" class="tv-btn-primary">Modifier</a>
         <a href="{{ route('admin.personal-ratings.index') }}" class="tv-btn-secondary">Retour</a>
         <form action="{{ route('admin.personal-ratings.destroy', $item) }}" method="POST" onsubmit="return confirm('Confirmer la suppression ?');">
             @csrf @method('DELETE')
@@ -16,10 +14,11 @@
 
     <div class="tv-card">
         <dl class="tv-dl">
-            <div><dt>Consommateur</dt><dd>{{ $item->consumer?->user.name ?? '—' }}</dd></div>
+            <div><dt>Consommateur</dt><dd>{{ $item->consumer?->user?->name ?? '—' }}</dd></div>
 <div><dt>Produit</dt><dd>{{ $item->product?->name ?? '—' }}</dd></div>
 <div><dt>Score</dt><dd>{{ $item->personalized_score ?? '—' }}</dd></div>
-<div><dt>Raison</dt><dd>{{ $item->reason ?? '—' }}</dd></div>
+<div><dt>Résumé</dt><dd>{{ $item->recommendation_reason ?? '—' }}</dd></div>
+<div class="sm:col-span-2"><dt>Détail du calcul</dt><dd>{{ $item->reason ?: 'Score basé uniquement sur l’empreinte environnementale.' }}</dd></div>
 
         </dl>
     </div>

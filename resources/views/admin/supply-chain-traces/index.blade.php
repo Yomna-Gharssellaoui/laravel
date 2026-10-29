@@ -10,10 +10,11 @@
             
             <button class="tv-btn-secondary" type="submit">Filtrer</button>
         </form>
-        <a href="{{ route('admin.supply-chain-traces.create') }}" class="tv-btn-primary">Ajouter</a>
+        @can('create', \App\Models\SupplyChainTrace::class)
+            <a href="{{ route('admin.supply-chain-traces.create') }}" class="tv-btn-primary">Ajouter</a>
+        @endcan
     </div>
 
-    <x-flash-messages />
 
     <div class="tv-card overflow-hidden p-0">
         <div class="overflow-x-auto">
@@ -30,16 +31,20 @@
                             <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->current_stage ?? '—' }}</td><td><x-status-badge :status="$item->status ?? '—'" /></td><td>{{ $item->total_distance_km ?? '—' }}</td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.supply-chain-traces.show', $item) }}" class="tv-link">Voir</a>
+                                @can('update', $item)
                                 <a href="{{ route('admin.supply-chain-traces.edit', $item) }}" class="tv-link ml-2">Modifier</a>
+                                @endcan
+                                @can('delete', $item)
                                 <form action="{{ route('admin.supply-chain-traces.destroy', $item) }}" method="POST" class="inline ml-2" onsubmit="return confirm('Confirmer la suppression ?');">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:underline text-sm">Supprimer</button>
                                 </form>
+                                @endcan
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ count($cfg['columns']) + 1 }}">
+                            <td colspan="100">
                                 <x-empty-state title="Aucun trace" message="Commencez par créer une entrée." />
                             </td>
                         </tr>

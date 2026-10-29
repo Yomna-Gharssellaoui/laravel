@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Alert;
+use App\Models\Certificate;
+use App\Models\Consumer;
+use App\Models\Distributor;
+use App\Models\EnvironmentalFootprint;
 use App\Models\Producer;
 use App\Models\Product;
-use App\Models\Transformer;
-use App\Models\Distributor;
-use App\Models\Certificate;
 use App\Models\Review;
-use App\Models\Alert;
-use App\Models\EnvironmentalFootprint;
-use App\Models\Consumer;
 use App\Models\SupplyChainTrace;
+use App\Models\Transformer;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class FrenchDemoSeeder extends Seeder
 {
@@ -21,7 +21,7 @@ class FrenchDemoSeeder extends Seeder
     {
         // Clean selected tables (safe for demo db)
         $tables = [
-            'personal_ratings', 'ai_analyses', 'alerts', 'reviews', 'environmental_footprints', 'products', 'supply_chain_traces', 'certificates', 'producers', 'transformers', 'distributors', 'consumers'
+            'personal_ratings', 'ai_analyses', 'alerts', 'reviews', 'environmental_footprints', 'products', 'supply_chain_traces', 'certificates', 'producers', 'transformers', 'distributors', 'consumers',
         ];
 
         foreach ($tables as $t) {
@@ -67,10 +67,10 @@ class FrenchDemoSeeder extends Seeder
 
             // footprints
             EnvironmentalFootprint::factory()->for($prod, 'product')->state([
-                'co2_emissions' => rand(1,10),
-                'water_usage' => rand(10,200),
-                'land_usage' => rand(1,5),
-                'ai_score' => rand(30,90),
+                'co2_emissions' => rand(1, 10),
+                'water_usage' => rand(10, 200),
+                'land_usage' => rand(1, 5),
+                'ai_score' => rand(30, 90),
             ])->create();
         }
 

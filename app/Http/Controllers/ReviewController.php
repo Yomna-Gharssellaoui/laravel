@@ -32,7 +32,8 @@ class ReviewController extends Controller
 
     public function update(Request $request, Review $review): RedirectResponse
     {
-        abort_unless($request->user()->id === $review->user_id || $request->user()->isAdmin(), 403);
+        // Only the author edits a review; admins moderate it from the back-office
+        abort_unless($request->user()->id === $review->user_id, 403);
 
         $data = $request->validate([
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
@@ -40,6 +41,7 @@ class ReviewController extends Controller
             'comment' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        // An edited review goes back to moderation
         $review->update($data + ['status' => 'pending']);
 
         return back()->with('success', 'Avis mis à jour (en attente de modération).');

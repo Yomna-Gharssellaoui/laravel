@@ -32,7 +32,17 @@
     ];
     $value = is_bool($status) ? ($status ? '1' : '0') : (string) ($status ?? '—');
     $class = $map[$value] ?? 'bg-slate-100 text-slate-700';
-    $label = is_bool($status) ? ($status ? 'oui' : 'non') : ($status ?? '—');
+    $labels = [
+        'published' => 'publié', 'draft' => 'brouillon', 'archived' => 'archivé',
+        'pending' => 'en attente', 'verified' => 'vérifié', 'approved' => 'approuvé', 'rejected' => 'rejeté',
+        'expired' => 'expiré', 'open' => 'ouverte', 'investigating' => 'en cours', 'resolved' => 'résolue',
+        'dismissed' => 'classée', 'in_transit' => 'en transit', 'delivered' => 'livré', 'delayed' => 'en retard',
+        'completed' => 'terminé', 'passed' => 'conforme', 'failed' => 'non conforme', 'needs_review' => 'à revoir',
+        'low' => 'faible', 'medium' => 'moyenne', 'high' => 'élevée', 'critical' => 'critique',
+        'admin' => 'admin', 'producer' => 'producteur', 'transformer' => 'transformateur',
+        'distributor' => 'distributeur', 'consumer' => 'consommateur',
+    ];
+    $label = is_bool($status) ? ($status ? 'oui' : 'non') : ($labels[$value] ?? $status ?? '—');
 @endphp
 
 <span {{ $attributes->merge(['class' => "tv-badge {$class}"]) }}>{{ $label }}</span>

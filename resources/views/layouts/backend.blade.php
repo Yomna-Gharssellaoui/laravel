@@ -23,7 +23,10 @@
             <nav class="space-y-1 p-4 text-sm overflow-y-auto max-h-[calc(100vh-4rem)]">
                 <a href="{{ route('admin.dashboard') }}" class="tv-nav-link {{ request()->routeIs('admin.dashboard') ? 'tv-nav-link-active' : '' }}">Tableau de bord</a>
                 <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Produits</p>
-                <a href="{{ route('admin.products.index') }}" class="tv-nav-link {{ request()->routeIs('admin.products.*') ? 'tv-nav-link-active' : '' }}">Produits</a>
+                <a href="{{ route('admin.products.index') }}" class="tv-nav-link {{ request()->routeIs('admin.products.*') ? 'tv-nav-link-active' : '' }}">{{ auth()->user()->isAdmin() ? 'Produits' : 'Mes produits' }}</a>
+                <a href="{{ route('admin.supply-chain-traces.index') }}" class="tv-nav-link {{ request()->routeIs('admin.supply-chain-traces.*') ? 'tv-nav-link-active' : '' }}">Traces logistiques</a>
+                <a href="{{ route('admin.certificates.index') }}" class="tv-nav-link {{ request()->routeIs('admin.certificates.*') ? 'tv-nav-link-active' : '' }}">Certifications</a>
+                @if(auth()->user()->isAdmin())
                 <a href="{{ route('admin.environmental-footprints.index') }}" class="tv-nav-link {{ request()->routeIs('admin.environmental-footprints.*') ? 'tv-nav-link-active' : '' }}">Empreintes</a>
                 <a href="{{ route('admin.environmental-claims.index') }}" class="tv-nav-link {{ request()->routeIs('admin.environmental-claims.*') ? 'tv-nav-link-active' : '' }}">Déclarations</a>
                 <a href="{{ route('admin.compliance-checks.index') }}" class="tv-nav-link {{ request()->routeIs('admin.compliance-checks.*') ? 'tv-nav-link-active' : '' }}">Conformité</a>
@@ -31,17 +34,15 @@
                 <a href="{{ route('admin.producers.index') }}" class="tv-nav-link {{ request()->routeIs('admin.producers.*') ? 'tv-nav-link-active' : '' }}">Producteurs</a>
                 <a href="{{ route('admin.transformers.index') }}" class="tv-nav-link {{ request()->routeIs('admin.transformers.*') ? 'tv-nav-link-active' : '' }}">Transformateurs</a>
                 <a href="{{ route('admin.distributors.index') }}" class="tv-nav-link {{ request()->routeIs('admin.distributors.*') ? 'tv-nav-link-active' : '' }}">Distributeurs</a>
-                <a href="{{ route('admin.supply-chain-traces.index') }}" class="tv-nav-link {{ request()->routeIs('admin.supply-chain-traces.*') ? 'tv-nav-link-active' : '' }}">Traces</a>
                 <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Qualité</p>
-                <a href="{{ route('admin.certificates.index') }}" class="tv-nav-link {{ request()->routeIs('admin.certificates.*') ? 'tv-nav-link-active' : '' }}">Certifications</a>
-                <a href="{{ route('admin.reviews.index') }}" class="tv-nav-link {{ request()->routeIs('admin.reviews.*') ? 'tv-nav-link-active' : '' }}">Avis</a>
                 <a href="{{ route('admin.alerts.index') }}" class="tv-nav-link {{ request()->routeIs('admin.alerts.*') ? 'tv-nav-link-active' : '' }}">Alertes</a>
                 <a href="{{ route('admin.ai-analyses.index') }}" class="tv-nav-link {{ request()->routeIs('admin.ai-analyses.*') ? 'tv-nav-link-active' : '' }}">Analyses IA</a>
+                <a href="{{ route('admin.reviews.index') }}" class="tv-nav-link {{ request()->routeIs('admin.reviews.*') ? 'tv-nav-link-active' : '' }}">Modération des avis</a>
                 <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Consommateurs</p>
                 <a href="{{ route('admin.consumers.index') }}" class="tv-nav-link {{ request()->routeIs('admin.consumers.*') ? 'tv-nav-link-active' : '' }}">Profils</a>
-                <a href="{{ route('admin.personal-ratings.index') }}" class="tv-nav-link {{ request()->routeIs('admin.personal-ratings.*') ? 'tv-nav-link-active' : '' }}">Évaluations</a>
-                @if(auth()->user()?->isAdmin())
-                    <a href="{{ route('admin.users.index') }}" class="tv-nav-link {{ request()->routeIs('admin.users.*') ? 'tv-nav-link-active' : '' }}">Utilisateurs</a>
+                <a href="{{ route('admin.personal-ratings.index') }}" class="tv-nav-link {{ request()->routeIs('admin.personal-ratings.*') ? 'tv-nav-link-active' : '' }}">Recommandations</a>
+                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Administration</p>
+                <a href="{{ route('admin.users.index') }}" class="tv-nav-link {{ request()->routeIs('admin.users.*') ? 'tv-nav-link-active' : '' }}">Utilisateurs</a>
                 @endif
                 <div class="pt-4 mt-4 border-t border-slate-100">
                     <a href="{{ route('home') }}" class="tv-nav-link">← Front office</a>
@@ -56,7 +57,10 @@
                     <h1 class="font-display text-xl font-semibold text-brand-800">@yield('page-title', 'Dashboard')</h1>
                 </div>
                 <div class="flex items-center gap-3 text-sm">
-                    <span class="hidden sm:inline text-slate-500">{{ auth()->user()->name }}</span>
+                    <a href="{{ route('profile.edit') }}" class="flex items-center gap-2 text-slate-600 hover:text-brand-700">
+                        <x-avatar :user="auth()->user()" class="h-8 w-8 text-xs" />
+                        <span class="hidden sm:inline">{{ auth()->user()->name }}</span>
+                    </a>
                     <x-status-badge :status="auth()->user()->role" />
                     <form method="POST" action="{{ route('logout') }}">@csrf<button class="tv-btn-secondary" type="submit">Déconnexion</button></form>
                 </div>

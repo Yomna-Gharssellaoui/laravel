@@ -17,12 +17,21 @@
                         @endforeach
                     </select>
                 </div>
+                <div>
+                    <x-input-label for="compliance_check_id" value="Vérification de conformité liée" />
+                    <select name="compliance_check_id" id="compliance_check_id" class="tv-input mt-1">
+                        <option value="">—</option>
+                        @foreach($complianceChecks as $check)
+                            <option value="{{ $check->id }}" @selected(old('compliance_check_id', $item?->compliance_check_id ?? '') == $check->id)>#{{ $check->id }} {{ $check->check_type }} — {{ $check->environmentalClaim?->title }} ({{ $check->status }})</option>
+                        @endforeach
+                    </select>
+                </div>
                 <x-form.field label="Type" name="alert_type" :value="old('alert_type', $item?->alert_type ?? '')" required />
                 <x-form.field label="Titre" name="title" :value="old('title', $item?->title ?? '')" required />
                 <div>
                     <x-input-label for="severity" value="Sévérité" />
                     <select name="severity" id="severity" class="tv-input mt-1" required>
-                        @foreach(['low','medium','high','critical'] as $st)
+                        @foreach(\App\Models\Alert::SEVERITIES as $st)
                             <option value="{{ $st }}" @selected(old('severity', $item?->severity ?? 'medium') === $st)>{{ $st }}</option>
                         @endforeach
                     </select>
@@ -30,7 +39,7 @@
                 <div>
                     <x-input-label for="status" value="Statut" />
                     <select name="status" id="status" class="tv-input mt-1" required>
-                        @foreach(['open','investigating','resolved','dismissed'] as $st)
+                        @foreach(\App\Models\Alert::STATUSES as $st)
                             <option value="{{ $st }}" @selected(old('status', $item?->status ?? 'open') === $st)>{{ $st }}</option>
                         @endforeach
                     </select>
@@ -41,8 +50,9 @@
                     <textarea name="description" id="description" rows="3" class="tv-input mt-1">{{ old('description', $item?->description ?? '') }}</textarea>
                 </div>
                 <div class="md:col-span-2">
-                    <x-input-label for="resolution" value="Résolution" />
+                    <x-input-label for="resolution" value="Résolution (obligatoire pour clôturer)" />
                     <textarea name="resolution" id="resolution" rows="2" class="tv-input mt-1">{{ old('resolution', $item?->resolution ?? '') }}</textarea>
+                    <x-input-error :messages="$errors->get('resolution')" class="mt-1" />
                 </div>
             </div>
             <div class="flex gap-3">

@@ -4,7 +4,6 @@
 @section('page-title', 'Détail transformateur')
 
 @section('content')
-    <x-flash-messages />
     <div class="flex gap-3 mb-6">
         <a href="{{ route('admin.transformers.edit', $item) }}" class="tv-btn-primary">Modifier</a>
         <a href="{{ route('admin.transformers.index') }}" class="tv-btn-secondary">Retour</a>

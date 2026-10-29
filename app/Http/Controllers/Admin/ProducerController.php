@@ -2,21 +2,26 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\ParsesCsv;
 use App\Http\Controllers\Controller;
 use App\Models\Producer;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ProducerController extends Controller
 {
+    use ParsesCsv;
+
     public function index(Request $request): View
     {
         $items = Producer::with('user')
             ->withCount('products')
-            ->when($request->q, fn ($q) => $q->where('company_name', 'like', '%'.$request->q.'%')
-                ->orWhere('location', 'like', '%'.$request->q.'%'))
+            ->when($request->q, fn ($q) => $q->where(fn ($query) => $query
+                ->where('company_name', 'like', '%'.$request->q.'%')
+                ->orWhere('location', 'like', '%'.$request->q.'%')))
             ->latest()
             ->paginate(12)
             ->withQueryString();
@@ -27,7 +32,7 @@ class ProducerController extends Controller
     public function create(): View
     {
         return view('admin.producers.create', [
-            'users' => User::where('role', 'producer')->orderBy('name')->get(),
+            'users' => $this->availableUsers(),
         ]);
     }
 
@@ -50,13 +55,13 @@ class ProducerController extends Controller
     {
         return view('admin.producers.edit', [
             'item' => $producer,
-            'users' => User::where('role', 'producer')->orderBy('name')->get(),
+            'users' => $this->availableUsers($producer),
         ]);
     }
 
     public function update(Request $request, Producer $producer): RedirectResponse
     {
-        $producer->update($this->validated($request));
+        $producer->update($this->validated($request, $producer));
 
         return redirect()->route('admin.producers.show', $producer)
             ->with('success', 'Producteur mis à jour.');
@@ -70,10 +75,25 @@ class ProducerController extends Controller
             ->with('success', 'Producteur supprimé.');
     }
 
-    private function validated(Request $request): array
+    /**
+     * Accounts with the producer role that are not yet linked to another company.
+     */
+    private function availableUsers(?Producer $current = null)
+    {
+        return User::where('role', 'producer')
+            ->where(fn ($q) => $q->whereDoesntHave('producer')->orWhere('id', $current?->user_id ?? 0))
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function validated(Request $request, ?Producer $producer = null): array
     {
         $data = $request->validate([
-            'user_id' => ['nullable', 'exists:users,id'],
+            'user_id' => [
+                'nullable',
+                Rule::exists('users', 'id')->where('role', 'producer'),
+                Rule::unique('producers', 'user_id')->ignore($producer),
+            ],
             'company_name' => ['required', 'string', 'max:255'],
             'location' => ['nullable', 'string', 'max:255'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
@@ -88,14 +108,5 @@ class ProducerController extends Controller
         $data['certifications'] = $this->csvToArray($data['certifications'] ?? null);
 
         return $data;
-    }
-
-    private function csvToArray(?string $value): ?array
-    {
-        if ($value === null || trim($value) === '') {
-            return null;
-        }
-
-        return array_values(array_filter(array_map('trim', explode(',', $value))));
     }
 }

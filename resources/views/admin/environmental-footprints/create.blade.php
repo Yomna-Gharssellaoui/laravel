@@ -19,10 +19,10 @@
                     </select>
                     <x-input-error :messages="$errors->get('product_id')" class="mt-1" />
                 </div>
-                <x-form.field label="Émissions CO₂ (kg)" name="co2_emissions" type="number" step="0.01" :value="old('co2_emissions', $item?->co2_emissions ?? '')" />
-                <x-form.field label="Usage eau (L)" name="water_usage" type="number" step="0.01" :value="old('water_usage', $item?->water_usage ?? '')" />
-                <x-form.field label="Usage terres" name="land_usage" type="number" step="0.01" :value="old('land_usage', $item?->land_usage ?? '')" />
-                <x-form.field label="Score environnemental (0-100)" name="ai_score" type="number" min="0" max="100" :value="old('ai_score', $item?->ai_score ?? '')" />
+                <x-form.field label="Émissions CO₂ (kg CO₂e / kg)" name="co2_emissions" type="number" step="0.01" :value="old('co2_emissions', $item?->co2_emissions ?? '')" />
+                <x-form.field label="Consommation d’eau (L / kg)" name="water_usage" type="number" step="0.01" :value="old('water_usage', $item?->water_usage ?? '')" />
+                <x-form.field label="Occupation des sols (m² / kg)" name="land_usage" type="number" step="0.01" :value="old('land_usage', $item?->land_usage ?? '')" />
+                <p class="md:col-span-2 text-sm text-slate-500">Le score environnemental (0-100) est calculé automatiquement : CO₂ 50 % (0 au-delà de 20 kg), eau 30 % (0 au-delà de 500 L), sols 20 % (0 au-delà de 10 m²).</p>
             </div>
             <div class="flex gap-3">
                 <button type="submit" class="tv-btn-primary">Enregistrer</button>

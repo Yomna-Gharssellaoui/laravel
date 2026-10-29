@@ -3,76 +3,61 @@
 @section('title', 'Modifier mes préférences')
 
 @section('content')
-    <section class="py-5 bg-light">
-        <div class="container py-5">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-sm rounded-4">
-                        <div class="card-body p-4 p-lg-5">
-                            <span class="badge rounded-pill bg-success-subtle text-success-emphasis px-3 py-2 text-uppercase fw-semibold">Profil</span>
-                            <h1 class="mt-4 display-6 fw-bold text-dark">Modifier mes préférences</h1>
-                            <p class="text-secondary mt-3 mb-4">Ces informations servent à personnaliser les recommandations de produits, sans constituer un diagnostic médical.</p>
+    <x-page-header eyebrow="Mon espace" title="Modifier mes préférences" subtitle="Ces informations personnalisent vos recommandations ; elles ne constituent pas un diagnostic médical." />
 
-                            <form method="POST" action="{{ route('consumer.update') }}" novalidate>
-                                @csrf
-                                @method('PATCH')
+    <section class="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+        <form method="POST" action="{{ route('consumer.update') }}" class="tv-card space-y-6">
+            @csrf
+            @method('PATCH')
 
-                                @if(session('status'))
-                                    <div class="alert alert-success" role="alert">
-                                        {{ session('status') }}
-                                    </div>
-                                @endif
+            <div>
+                <x-input-label value="Préférences" />
+                @php($selected = old('preferences', $consumer->preferences ?? []))
+                <div class="mt-2 grid gap-3 sm:grid-cols-2">
+                    @foreach(\App\Models\Consumer::PREFERENCES as $key => $label)
+                        <label class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-700 has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
+                            <input type="checkbox" name="preferences[]" value="{{ $key }}" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" @checked(in_array($key, $selected, true))>
+                            {{ $label }}
+                        </label>
+                    @endforeach
+                </div>
+                <x-input-error :messages="$errors->get('preferences.*')" class="mt-2" />
+            </div>
 
-                                <div class="row g-4">
-                                    <div class="col-12">
-                                        <label for="preferences" class="form-label fw-semibold">Préférences</label>
-                                        <input id="preferences" name="preferences" value="{{ old('preferences', implode(', ', $consumer->preferences ?? [])) }}" class="form-control form-control-lg" placeholder="local, bio, faible_co2">
-                                        <small class="form-text text-muted">Séparez les préférences par des virgules (ex. local, bio).</small>
-                                        @error('preferences')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="sustainability_level" class="form-label fw-semibold">Niveau de durabilité</label>
-                                        <select id="sustainability_level" name="sustainability_level" class="form-select form-select-lg">
-                                            @foreach(['débutant','intermédiaire','engagé','expert'] as $level)
-                                                <option value="{{ $level }}" @selected(old('sustainability_level', $consumer->sustainability_level) === $level)>{{ $level }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('sustainability_level')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="budget_range" class="form-label fw-semibold">Budget</label>
-                                        <select id="budget_range" name="budget_range" class="form-select form-select-lg">
-                                            @foreach(['éco','moyen','premium'] as $range)
-                                                <option value="{{ $range }}" @selected(old('budget_range', $consumer->budget_range) === $range)>{{ $range }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('budget_range')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="dietary_restrictions" class="form-label fw-semibold">Restrictions alimentaires</label>
-                                        <input id="dietary_restrictions" name="dietary_restrictions" value="{{ old('dietary_restrictions', implode(', ', $consumer->dietary_restrictions ?? [])) }}" class="form-control form-control-lg" placeholder="végétarien, sans gluten">
-                                        @error('dietary_restrictions')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label for="allergies" class="form-label fw-semibold">Allergies</label>
-                                        <input id="allergies" name="allergies" value="{{ old('allergies', implode(', ', $consumer->allergies ?? [])) }}" class="form-control form-control-lg" placeholder="gluten, lactose">
-                                        @error('allergies')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
-                                    </div>
-                                </div>
-
-                                <div class="d-flex flex-wrap gap-3 mt-5">
-                                    <button type="submit" class="btn btn-success btn-lg">Enregistrer</button>
-                                    <a href="{{ route('consumer.profile') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <x-input-label for="sustainability_level" value="Niveau de durabilité" />
+                    <select id="sustainability_level" name="sustainability_level" class="tv-input mt-1 w-full">
+                        @foreach(\App\Models\Consumer::LEVELS as $level)
+                            <option value="{{ $level }}" @selected(old('sustainability_level', $consumer->sustainability_level) === $level)>{{ $level }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('sustainability_level')" class="mt-1" />
+                </div>
+                <div>
+                    <x-input-label for="budget_range" value="Budget" />
+                    <select id="budget_range" name="budget_range" class="tv-input mt-1 w-full">
+                        @foreach(\App\Models\Consumer::BUDGETS as $range)
+                            <option value="{{ $range }}" @selected(old('budget_range', $consumer->budget_range) === $range)>{{ $range }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('budget_range')" class="mt-1" />
+                </div>
+                <div>
+                    <x-input-label for="dietary_restrictions" value="Restrictions alimentaires" />
+                    <input id="dietary_restrictions" name="dietary_restrictions" value="{{ old('dietary_restrictions', implode(', ', $consumer->dietary_restrictions ?? [])) }}" class="tv-input mt-1 w-full" placeholder="végétarien, sans gluten">
+                </div>
+                <div>
+                    <x-input-label for="allergies" value="Allergies" />
+                    <input id="allergies" name="allergies" value="{{ old('allergies', implode(', ', $consumer->allergies ?? [])) }}" class="tv-input mt-1 w-full" placeholder="gluten, lactose">
+                    <p class="mt-1 text-xs text-slate-500">Les produits contenant une de vos allergies sont écartés.</p>
                 </div>
             </div>
-        </div>
+
+            <div class="flex gap-3">
+                <button type="submit" class="tv-btn-primary">Enregistrer</button>
+                <a href="{{ route('consumer.profile') }}" class="tv-btn-secondary">Annuler</a>
+            </div>
+        </form>
     </section>
 @endsection
