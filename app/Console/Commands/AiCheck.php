@@ -24,6 +24,8 @@ class AiCheck extends Command
             ['AI_PROVIDER', config('services.ai.provider') ?? '(non défini)'],
             ['GEMINI_API_KEY', $mask(config('services.gemini.api_key'))],
             ['GEMINI_MODEL', config('services.gemini.model') ?? '(non défini)'],
+            ['GEMINI_TIMEOUT', config('services.gemini.timeout').' s'],
+            ['GEMINI_THINKING_LEVEL', config('services.gemini.thinking_level') ?: '(défaut du modèle)'],
             ['ANTHROPIC_API_KEY', $mask(config('services.anthropic.api_key'))],
             ['Cache de configuration', app()->configurationIsCached() ? 'OUI (lancez php artisan config:clear)' : 'non'],
             ['Certificats curl (php.ini)', ini_get('curl.cainfo') ?: '(non défini)'],
@@ -41,6 +43,8 @@ class AiCheck extends Command
         $this->info('Fournisseur sélectionné : '.class_basename($llm).' ('.$llm->name().')');
         $this->line('Appel de test en cours…');
 
+        $started = microtime(true);
+
         try {
             $answer = $llm->text('Réponds en une phrase courte, en français.', 'Dis bonjour à Trace Verte.');
         } catch (Throwable $e) {
@@ -51,7 +55,7 @@ class AiCheck extends Command
             return self::FAILURE;
         }
 
-        $this->info('Réponse reçue : '.$answer);
+        $this->info('Réponse reçue en '.round(microtime(true) - $started, 1).' s : '.$answer);
         $this->info('L’IA fonctionne. Rechargez la page du produit et reposez la question.');
 
         return self::SUCCESS;
@@ -64,6 +68,8 @@ class AiCheck extends Command
             str_contains($error, 'API key not valid') || str_contains($error, '401') || str_contains($error, '403') => 'Piste : clé refusée. Recopiez-la depuis https://aistudio.google.com/apikey (sans espace).',
             str_contains($error, 'not found') || str_contains($error, '404') => 'Piste : modèle introuvable. Choisissez un modèle listé dans AI Studio et mettez-le dans GEMINI_MODEL.',
             str_contains($error, '429') || str_contains($error, 'quota') => 'Piste : quota gratuit atteint, réessayez dans une minute.',
+            str_contains($error, 'timed out') && str_contains($error, '0 bytes') => 'Piste : le modèle met trop de temps à répondre. Ajoutez GEMINI_THINKING_LEVEL=low (réflexion réduite, plus rapide) et/ou GEMINI_TIMEOUT=120 dans .env, puis php artisan config:clear.',
+            str_contains($error, 'thinking') => 'Piste : ce modèle ne connaît pas ce niveau de réflexion. Essayez GEMINI_THINKING_LEVEL=low, ou laissez la ligne vide.',
             str_contains($error, 'resolve') || str_contains($error, 'timed out') || str_contains($error, 'Connection') => 'Piste : pas d’accès Internet depuis PHP (pare-feu, proxy ou antivirus).',
             default => 'Envoyez ce message pour diagnostic.',
         };

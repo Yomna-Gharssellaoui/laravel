@@ -12,7 +12,15 @@ class GeminiModel implements LanguageModel
 {
     private const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent';
 
-    public function __construct(private string $apiKey, private string $model) {}
+    /**
+     * @param  string|null  $thinkingLevel  Gemini 3 thinking depth ("minimal", "low", "high"); null = model default
+     */
+    public function __construct(
+        private string $apiKey,
+        private string $model,
+        private int $timeout = 60,
+        private ?string $thinkingLevel = null,
+    ) {}
 
     public function name(): string
     {
@@ -36,7 +44,12 @@ class GeminiModel implements LanguageModel
 
     private function generate(string $system, string $prompt, array $generationConfig = []): string
     {
-        $response = Http::timeout(60)
+        if ($this->thinkingLevel) {
+            // Less thinking = much faster answers, enough for these short tasks
+            $generationConfig['thinkingConfig'] = ['thinkingLevel' => $this->thinkingLevel];
+        }
+
+        $response = Http::timeout($this->timeout)
             ->withHeaders(['x-goog-api-key' => $this->apiKey])
             ->post(sprintf(self::ENDPOINT, $this->model), [
                 'systemInstruction' => ['parts' => [['text' => $system]]],

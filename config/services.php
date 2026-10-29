@@ -45,6 +45,9 @@ return [
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
         'model' => env('GEMINI_MODEL', 'gemini-3.8-flash'),
+        // Seconds to wait for an answer, and optional thinking depth (minimal, low, high)
+        'timeout' => env('GEMINI_TIMEOUT', 60),
+        'thinking_level' => env('GEMINI_THINKING_LEVEL'),
     ],
 
     'anthropic' => [

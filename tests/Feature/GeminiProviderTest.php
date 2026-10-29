@@ -92,6 +92,18 @@ class GeminiProviderTest extends TestCase
         });
     }
 
+    public function test_thinking_level_is_sent_only_when_configured(): void
+    {
+        $this->geminiReturns('Bonjour');
+        app(AiProvider::class)->current()->text('system', 'prompt');
+        Http::assertSent(fn (Request $request) => ! isset($request['generationConfig']['thinkingConfig']));
+
+        config(['services.gemini.thinking_level' => 'low']);
+        $this->geminiReturns('Bonjour');
+        app(AiProvider::class)->current()->text('system', 'prompt');
+        Http::assertSent(fn (Request $request) => ($request['generationConfig']['thinkingConfig']['thinkingLevel'] ?? null) === 'low');
+    }
+
     public function test_gemini_error_falls_back_to_the_heuristic(): void
     {
         Http::fake(['generativelanguage.googleapis.com/*' => Http::response(['error' => ['message' => 'API key not valid']], 400)]);

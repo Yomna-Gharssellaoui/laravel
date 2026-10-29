@@ -17,7 +17,12 @@ class AiProvider
             ? new ClaudeModel(config('services.anthropic.api_key'), config('services.anthropic.model'))
             : null;
         $gemini = filled(config('services.gemini.api_key'))
-            ? new GeminiModel(config('services.gemini.api_key'), config('services.gemini.model'))
+            ? new GeminiModel(
+                config('services.gemini.api_key'),
+                config('services.gemini.model'),
+                (int) config('services.gemini.timeout', 60),
+                config('services.gemini.thinking_level') ?: null,
+            )
             : null;
 
         return match ($provider) {
