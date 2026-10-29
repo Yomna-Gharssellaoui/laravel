@@ -121,7 +121,7 @@ Deux fournisseurs sont pris en charge (`app/Services/Ai`), au choix dans `.env` 
 
 | Fournisseur | Variables | Clé |
 |---|---|---|
-| Google Gemini | `GEMINI_API_KEY`, `GEMINI_MODEL` (défaut `gemini-2.5-flash`) | gratuite sur https://aistudio.google.com/apikey |
+| Google Gemini | `GEMINI_API_KEY`, `GEMINI_MODEL` (défaut `gemini-3.8-flash`) | gratuite sur https://aistudio.google.com/apikey |
 | Anthropic Claude | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (défaut `claude-opus-5-5`) | https://console.anthropic.com |
 
 `AI_PROVIDER=auto` utilise le premier fournisseur qui a une clé ; `gemini` ou `anthropic` en impose un.

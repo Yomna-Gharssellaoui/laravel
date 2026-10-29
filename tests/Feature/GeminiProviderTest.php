@@ -27,7 +27,7 @@ class GeminiProviderTest extends TestCase
         config([
             'services.ai.provider' => 'gemini',
             'services.gemini.api_key' => 'test-gemini-key',
-            'services.gemini.model' => 'gemini-2.5-flash',
+            'services.gemini.model' => 'gemini-3.8-flash',
         ]);
     }
 
@@ -75,7 +75,7 @@ class GeminiProviderTest extends TestCase
 
         $analysis = app(GreenwashingAnalyzer::class)->analyzeClaim($this->claim());
 
-        $this->assertSame('gemini-2.5-flash', $analysis->model_used);
+        $this->assertSame('gemini-3.8-flash', $analysis->model_used);
         $this->assertFalse($analysis->is_demo);
         $this->assertSame(82, $analysis->greenwashing_score);
         $this->assertCount(2, $analysis->red_flags);
@@ -84,7 +84,7 @@ class GeminiProviderTest extends TestCase
             $schema = $request['generationConfig']['responseSchema'];
 
             return $request->hasHeader('x-goog-api-key', 'test-gemini-key')
-                && str_contains($request->url(), 'models/gemini-2.5-flash:generateContent')
+                && str_contains($request->url(), 'models/gemini-3.8-flash:generateContent')
                 && $request['generationConfig']['responseMimeType'] === 'application/json'
                 && ! array_key_exists('additionalProperties', $schema)
                 && $schema['type'] === 'OBJECT'

@@ -7,7 +7,7 @@ namespace App\Services\Ai;
  */
 interface LanguageModel
 {
-    /** Label stored with each analysis, e.g. "claude-opus-5-5" or "gemini-2.5-flash". */
+    /** Label stored with each analysis, e.g. "claude-opus-5-5" or "gemini-3.8-flash". */
     public function name(): string;
 
     /**
