@@ -2,14 +2,14 @@
 
 return [
     'accepted' => 'Le champ :attribute doit être accepté.',
-    'after' => 'Le champ :attribute doit être une date postérieure au :date.',
-    'after_or_equal' => 'Le champ :attribute doit être une date postérieure ou égale au :date.',
+    'after' => 'Le champ :attribute doit être une date postérieure à :date.',
+    'after_or_equal' => 'Le champ :attribute doit être une date postérieure ou égale à :date.',
     'array' => 'Le champ :attribute doit être une liste.',
-    'before' => 'Le champ :attribute doit être une date antérieure au :date.',
-    'before_or_equal' => 'Le champ :attribute doit être une date antérieure ou égale au :date.',
+    'before' => 'Le champ :attribute doit être une date antérieure à :date.',
+    'before_or_equal' => 'Le champ :attribute doit être une date antérieure ou égale à :date.',
     'between' => [
-        'numeric' => 'La valeur de :attribute doit être comprise entre :min et :max.',
-        'string' => 'Le texte :attribute doit contenir entre :min et :max caractères.',
+        'numeric' => 'La valeur du champ :attribute doit être comprise entre :min et :max.',
+        'string' => 'Le champ :attribute doit contenir entre :min et :max caractères.',
     ],
     'boolean' => 'Le champ :attribute doit être vrai ou faux.',
     'confirmed' => 'La confirmation du champ :attribute ne correspond pas.',
@@ -24,15 +24,15 @@ return [
     'lowercase' => 'Le champ :attribute doit être en minuscules.',
     'max' => [
         'file' => 'Le fichier :attribute ne doit pas dépasser :max Ko.',
-        'numeric' => 'La valeur de :attribute ne doit pas dépasser :max.',
-        'string' => 'Le texte :attribute ne doit pas dépasser :max caractères.',
+        'numeric' => 'La valeur du champ :attribute ne doit pas dépasser :max.',
+        'string' => 'Le champ :attribute ne doit pas dépasser :max caractères.',
         'array' => 'Le champ :attribute ne doit pas contenir plus de :max éléments.',
     ],
     'mimes' => 'Le fichier :attribute doit être de type : :values.',
     'min' => [
         'file' => 'Le fichier :attribute doit faire au moins :min Ko.',
-        'numeric' => 'La valeur de :attribute doit être au moins :min.',
-        'string' => 'Le texte :attribute doit contenir au moins :min caractères.',
+        'numeric' => 'La valeur du champ :attribute doit être au moins :min.',
+        'string' => 'Le champ :attribute doit contenir au moins :min caractères.',
         'array' => 'Le champ :attribute doit contenir au moins :min éléments.',
     ],
     'numeric' => 'Le champ :attribute doit être un nombre.',
@@ -51,7 +51,7 @@ return [
         'string' => 'Le champ :attribute doit contenir :size caractères.',
     ],
     'string' => 'Le champ :attribute doit être un texte.',
-    'unique' => 'Cette valeur de :attribute est déjà utilisée.',
+    'unique' => 'La valeur du champ :attribute est déjà utilisée.',
     'uploaded' => 'Le téléversement du fichier :attribute a échoué.',
     'url' => 'Le champ :attribute doit être une URL valide.',
 
@@ -86,5 +86,23 @@ return [
         'image' => 'image',
         'document' => 'document',
         'question' => 'question',
+        'checked_at' => 'date de vérification',
+        'detected_at' => 'date de détection',
+        'co2_emissions' => 'émissions CO₂',
+        'water_usage' => 'consommation d’eau',
+        'land_usage' => 'occupation des sols',
+        'latitude' => 'latitude',
+        'longitude' => 'longitude',
+        'barcode' => 'code-barres',
+        'sku' => 'SKU',
+        'steps.*.stage' => 'nom de l’étape',
+        'steps.*.lat' => 'latitude de l’étape',
+        'steps.*.lon' => 'longitude de l’étape',
+        'steps.*.at' => 'date de l’étape',
+    ],
+
+    // Displayed instead of the raw rule parameter, e.g. "before_or_equal:today"
+    'values' => [
+        'checked_at' => ['today' => 'aujourd’hui'],
     ],
 ];

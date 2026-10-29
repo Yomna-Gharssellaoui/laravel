@@ -125,6 +125,7 @@ PROMPT;
         if ($product->environmentalFootprint) {
             $parts[] = 'score environnemental '.$product->environmentalFootprint->ai_score.'/100';
         }
+        $parts[] = 'ingrédients : '.($product->ingredients ?: 'non renseignés');
         $certs = $product->certificates->where('status', 'verified')->pluck('certificate_type');
         $parts[] = $certs->isNotEmpty() ? 'certifications vérifiées : '.$certs->implode(', ') : 'aucune certification vérifiée';
 
