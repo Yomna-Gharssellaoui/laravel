@@ -25,7 +25,7 @@ class GreenwashingAnalyzer
 
     /** Vague marketing terms that are not meaningful without proof. */
     private const VAGUE_TERMS = [
-        'écologique', 'eco', 'éco', 'vert', 'green', 'naturel', 'durable', 'responsable',
+        'écologique', 'éco', 'vert', 'green', 'naturel', 'durable', 'responsable',
         'respectueux', 'propre', 'neutre en carbone', 'carbone neutre', 'zéro impact',
         '100%', '100 %', 'sans impact', 'planète', 'biodégradable',
     ];
@@ -204,7 +204,11 @@ PROMPT;
         $flags = [];
 
         $text = Str::lower($claims->map(fn ($c) => $c->claim_type.' '.$c->title.' '.$c->description)->implode(' '));
-        $found = array_values(array_filter(self::VAGUE_TERMS, fn ($term) => str_contains($text, $term)));
+        // Whole words only: "éco" must not match inside "récolté"
+        $found = array_values(array_filter(
+            self::VAGUE_TERMS,
+            fn ($term) => preg_match('/(?<![\pL\pN])'.preg_quote($term, '/').'(?![\pL\pN])/u', $text) === 1
+        ));
         if ($found !== []) {
             $score += min(36, 12 * count($found));
             $flags[] = 'Termes vagues sans preuve chiffrée : '.implode(', ', array_slice($found, 0, 5));

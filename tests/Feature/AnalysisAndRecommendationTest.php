@@ -40,6 +40,22 @@ class AnalysisAndRecommendationTest extends TestCase
         $this->assertSame(100 - $analysis->greenwashing_score, $claim->fresh()->confidence_score);
     }
 
+    public function test_vague_terms_are_matched_as_whole_words(): void
+    {
+        config(['services.anthropic.api_key' => null]);
+
+        $claim = EnvironmentalClaim::create([
+            'product_id' => Product::factory()->create()->id,
+            'claim_type' => 'Produit local',
+            'title' => 'Piments récoltés à 12 km',
+            'status' => 'pending',
+        ]);
+
+        $analysis = app(GreenwashingAnalyzer::class)->analyzeClaim($claim);
+
+        $this->assertEmpty(array_filter($analysis->red_flags, fn ($flag) => str_starts_with($flag, 'Termes vagues')));
+    }
+
     public function test_admin_launches_an_analysis_from_a_claim(): void
     {
         config(['services.anthropic.api_key' => null]);

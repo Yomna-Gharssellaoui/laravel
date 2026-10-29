@@ -50,6 +50,11 @@ php artisan schedule:work          # en local
 php artisan traceverte:scan-alerts # exécution manuelle
 ```
 
+## Jeu de données et guide de test
+
+`php artisan migrate:fresh --seed` charge un jeu de données cohérent (produits tunisiens) avec tous les
+cas à démontrer. Les scénarios de test, module par module, sont dans [docs/GUIDE-DE-TEST.md](docs/GUIDE-DE-TEST.md).
+
 ## Comptes de démonstration
 
 Mot de passe : `password`
@@ -60,7 +65,11 @@ Mot de passe : `password`
 | producer@traceverte.test | producer | ses produits, leurs certifications et traces |
 | transformer@traceverte.test | transformer | les produits qu'il transforme |
 | distributor@traceverte.test | distributor | les traces logistiques qu'il assure |
+| producer2@traceverte.test | producer | un autre producteur (dattes) |
 | consumer@traceverte.test | consumer | site public, avis, recommandations |
+| sara@traceverte.test | consumer | allergique au gluten |
+| nouveau@traceverte.test | consumer | email non vérifié |
+| bloque@traceverte.test | consumer | compte suspendu |
 
 ## Rôles et permissions
 

@@ -88,7 +88,7 @@ class CrudSmokeTest extends TestCase
         $this->get('/produits')->assertOk();
         $this->get("/produits/{$product->id}")->assertOk();
         $this->get("/produits/{$product->id}/trace")->assertOk();
-        $this->actingAs($consumer)->get("/produits/{$product->id}")->assertOk()->assertSee('Donner mon avis');
+        $this->actingAs($consumer)->get("/produits/{$product->id}")->assertOk()->assertSee('Modifier mon avis');
         $this->actingAs($consumer)->get('/mon-profil')->assertOk();
         $this->actingAs($consumer)->get('/mes-recommandations')->assertOk();
     }
