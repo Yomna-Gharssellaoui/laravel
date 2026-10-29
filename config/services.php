@@ -35,7 +35,18 @@ return [
         ],
     ],
 
-    // Greenwashing analysis (Claude API). Without a key, a local heuristic is used instead.
+    // AI features (greenwashing analysis, product assistant).
+    // AI_PROVIDER: auto (first provider with a key), anthropic or gemini.
+    // Without any key, a local heuristic / factual summary is used instead.
+    'ai' => [
+        'provider' => env('AI_PROVIDER', 'auto'),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
+    ],
+
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),
         'model' => env('ANTHROPIC_MODEL', 'claude-opus-5-5'),

@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use Anthropic\Client;
 use App\Models\Product;
+use App\Services\Ai\AiProvider;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
  * Answers consumers' questions about a product, grounded only in the
- * traceability data stored for it (Claude API; factual fallback without a key).
+ * traceability data stored for it (Claude or Gemini; factual fallback without a key).
  */
 class ProductAssistant
 {
@@ -23,9 +23,11 @@ liste des ingrédients et recommande de vérifier l'étiquette.
 Réponds en français, en 2 à 5 phrases, sans titre ni liste à puces sauf si on te le demande.
 PROMPT;
 
+    public function __construct(private AiProvider $ai) {}
+
     public function enabled(): bool
     {
-        return filled(config('services.anthropic.api_key'));
+        return $this->ai->enabled();
     }
 
     /**
@@ -33,13 +35,13 @@ PROMPT;
      */
     public function ask(Product $product, string $question): array
     {
-        $sheet = $this->productSheet($product);
-
-        if ($this->enabled()) {
+        if ($llm = $this->ai->current()) {
             try {
-                return ['answer' => $this->askClaude($sheet, $question), 'ai' => true];
+                $prompt = "<fiche_produit>\n{$this->productSheet($product)}\n</fiche_produit>\n\nQuestion du consommateur : {$question}";
+
+                return ['answer' => $llm->text(self::SYSTEM_PROMPT, $prompt), 'ai' => true];
             } catch (Throwable $e) {
-                Log::warning('Product assistant failed', ['error' => $e->getMessage()]);
+                Log::warning('Product assistant via '.$llm->name().' failed', ['error' => $e->getMessage()]);
             }
         }
 
@@ -47,34 +49,6 @@ PROMPT;
             'answer' => 'L’assistant IA n’est pas disponible pour le moment. Voici ce que nous savons du produit : '.$this->shortSummary($product),
             'ai' => false,
         ];
-    }
-
-    private function askClaude(string $sheet, string $question): string
-    {
-        $client = new Client(apiKey: config('services.anthropic.api_key'));
-
-        $message = $client->beta->messages->create(
-            model: config('services.anthropic.model'),
-            maxTokens: 2000,
-            system: self::SYSTEM_PROMPT,
-            messages: [
-                ['role' => 'user', 'content' => "<fiche_produit>\n{$sheet}\n</fiche_produit>\n\nQuestion du consommateur : {$question}"],
-            ],
-            outputConfig: ['effort' => 'low'],
-            fallbacks: 'default',
-            betas: ['server-side-fallback-2026-07-01'],
-        );
-
-        if ($message->stopReason === 'refusal') {
-            throw new \RuntimeException('Claude declined the request');
-        }
-
-        $text = collect($message->content)
-            ->filter(fn ($block) => $block->type === 'text')
-            ->map(fn ($block) => $block->text)
-            ->implode("\n");
-
-        return trim($text) !== '' ? trim($text) : throw new \RuntimeException('Empty answer');
     }
 
     public function productSheet(Product $product): string

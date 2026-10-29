@@ -114,8 +114,17 @@ Messages de validation et emails en français (`lang/fr`).
 ## IA : détection du greenwashing
 
 `app/Services/GreenwashingAnalyzer.php` envoie la déclaration et ses preuves (certifications, empreinte,
-vérifications) à l'API Claude et reçoit une réponse JSON structurée (score de risque, crédibilité,
-résumé, signaux d'alerte). Renseignez `ANTHROPIC_API_KEY` dans `.env` pour l'activer.
+vérifications) au modèle d'IA et reçoit une réponse JSON structurée (score de risque, crédibilité,
+résumé, signaux d'alerte).
+
+Deux fournisseurs sont pris en charge (`app/Services/Ai`), au choix dans `.env` :
+
+| Fournisseur | Variables | Clé |
+|---|---|---|
+| Google Gemini | `GEMINI_API_KEY`, `GEMINI_MODEL` (défaut `gemini-2.5-flash`) | gratuite sur https://aistudio.google.com/apikey |
+| Anthropic Claude | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (défaut `claude-opus-5-5`) | https://console.anthropic.com |
+
+`AI_PROVIDER=auto` utilise le premier fournisseur qui a une clé ; `gemini` ou `anthropic` en impose un.
 
 Sans clé (ou si l'API ne répond pas), une heuristique locale explicable prend le relais ; l'analyse est
 alors marquée `is_demo` et le moteur affiché est `heuristique-locale-v1`.

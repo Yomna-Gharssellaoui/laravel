@@ -31,6 +31,7 @@ class AIAnalysisController extends Controller
         return view('admin.ai-analyses.index', [
             'items' => $items,
             'aiEnabled' => $analyzer->aiEnabled(),
+            'modelName' => $analyzer->modelName(),
         ]);
     }
 
@@ -70,7 +71,7 @@ class AIAnalysisController extends Controller
     private function message(AIAnalysis $analysis): string
     {
         return $analysis->is_demo
-            ? 'Analyse heuristique enregistrée (aucune clé ANTHROPIC_API_KEY configurée, ou l’API n’a pas répondu).'
+            ? 'Analyse heuristique enregistrée (aucune clé IA configurée, ou l’API n’a pas répondu : voir storage/logs/laravel.log).'
             : 'Analyse IA enregistrée ('.$analysis->model_used.').';
     }
 }

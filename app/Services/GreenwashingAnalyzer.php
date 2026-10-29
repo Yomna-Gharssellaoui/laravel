@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use Anthropic\Client;
 use App\Models\AIAnalysis;
 use App\Models\EnvironmentalClaim;
 use App\Models\Product;
+use App\Services\Ai\AiProvider;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -14,10 +14,10 @@ use Throwable;
 /**
  * Scores environmental claims for greenwashing risk.
  *
- * With ANTHROPIC_API_KEY set, the claim and its evidence (certifications, footprint,
- * compliance checks) are sent to Claude, which returns a structured JSON verdict.
- * Without a key, or if the API call fails, a transparent rule-based heuristic is used
- * and the analysis is flagged as is_demo.
+ * With an AI key (Claude or Gemini, see AiProvider), the claim and its evidence
+ * (certifications, footprint, compliance checks) are sent to the model, which returns a
+ * structured JSON verdict. Without a key, or if the call fails, a transparent rule-based
+ * heuristic is used and the analysis is flagged as is_demo.
  */
 class GreenwashingAnalyzer
 {
@@ -38,7 +38,7 @@ class GreenwashingAnalyzer
                 'description' => '0 = claim fully substantiated, 100 = almost certainly greenwashing',
             ],
             'credibility_rating' => ['type' => 'string', 'enum' => ['élevée', 'moyenne', 'faible']],
-            'summary' => ['type' => 'string', 'description' => 'Two to four sentences in French'],
+            'summary' => ['type' => 'string', 'description' => 'Deux à quatre phrases en français'],
             'red_flags' => ['type' => 'array', 'items' => ['type' => 'string']],
         ],
         'required' => ['greenwashing_score', 'credibility_rating', 'summary', 'red_flags'],
@@ -92,12 +92,12 @@ PROMPT;
         $result = null;
         $model = self::HEURISTIC_MODEL;
 
-        if ($this->aiEnabled()) {
+        if ($llm = $this->ai->current()) {
             try {
-                $result = $this->askClaude($this->buildContext($product, $claims));
-                $model = config('services.anthropic.model');
+                $result = $this->validResult($llm->json(self::SYSTEM_PROMPT, $this->buildContext($product, $claims), self::RESPONSE_SCHEMA));
+                $model = $llm->name();
             } catch (Throwable $e) {
-                Log::warning('Greenwashing analysis via Claude failed, using heuristic', ['error' => $e->getMessage()]);
+                Log::warning('Greenwashing analysis via '.$llm->name().' failed, using heuristic', ['error' => $e->getMessage()]);
             }
         }
 
@@ -116,48 +116,33 @@ PROMPT;
         ]);
     }
 
+    public function __construct(private AiProvider $ai) {}
+
     public function aiEnabled(): bool
     {
-        return filled(config('services.anthropic.api_key'));
+        return $this->ai->enabled();
     }
 
-    private function askClaude(string $context): array
+    public function modelName(): ?string
     {
-        $client = new Client(apiKey: config('services.anthropic.api_key'));
+        return $this->ai->current()?->name();
+    }
 
-        // Beta endpoint only for the server-side fallback: if the model declines,
-        // the API retries on a fallback model instead of returning a refusal
-        $message = $client->beta->messages->create(
-            model: config('services.anthropic.model'),
-            maxTokens: 4000,
-            system: self::SYSTEM_PROMPT,
-            messages: [
-                ['role' => 'user', 'content' => $context],
-            ],
-            outputConfig: [
-                'effort' => 'low',
-                'format' => [
-                    'type' => 'json_schema',
-                    'schema' => self::RESPONSE_SCHEMA,
-                ],
-            ],
-            fallbacks: 'default',
-            betas: ['server-side-fallback-2026-07-01'],
-        );
-
-        if ($message->stopReason === 'refusal') {
-            throw new \RuntimeException('Claude declined the request');
+    /**
+     * Guard against a model answer that does not follow the schema.
+     */
+    private function validResult(array $data): array
+    {
+        if (! isset($data['greenwashing_score'], $data['credibility_rating'], $data['summary']) || ! is_numeric($data['greenwashing_score'])) {
+            throw new \UnexpectedValueException('Incomplete AI answer: '.json_encode($data));
         }
 
-        foreach ($message->content as $block) {
-            if ($block->type === 'text') {
-                $data = json_decode($block->text, true, flags: JSON_THROW_ON_ERROR);
-
-                return $data;
-            }
+        $data['red_flags'] = array_values(array_filter((array) ($data['red_flags'] ?? []), 'is_string'));
+        if (! in_array($data['credibility_rating'], ['élevée', 'moyenne', 'faible'], true)) {
+            $data['credibility_rating'] = 'moyenne';
         }
 
-        throw new \RuntimeException('No text block in Claude response');
+        return $data;
     }
 
     private function buildContext(?Product $product, $claims): string
@@ -251,7 +236,7 @@ PROMPT;
             'credibility_rating' => $score < 35 ? 'élevée' : ($score < 65 ? 'moyenne' : 'faible'),
             'summary' => 'Analyse heuristique locale (sans IA) : '.($flags === []
                 ? 'les déclarations sont couvertes par des preuves vérifiées.'
-                : count($flags).' signal(aux) d’alerte relevé(s). Configurez ANTHROPIC_API_KEY pour une analyse par IA.'),
+                : count($flags).' signal(aux) d’alerte relevé(s). Configurez GEMINI_API_KEY ou ANTHROPIC_API_KEY pour une analyse par IA.'),
             'red_flags' => $flags,
         ];
     }

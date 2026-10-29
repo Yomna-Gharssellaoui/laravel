@@ -55,12 +55,12 @@ class TraceVerteDatasetSeeder extends Seeder
         $this->consumersAndReviews($users, $products);
 
         // Greenwashing analyses with the local heuristic (no API call while seeding)
-        $apiKey = config('services.anthropic.api_key');
-        config(['services.anthropic.api_key' => null]);
+        $keys = ['services.anthropic.api_key' => config('services.anthropic.api_key'), 'services.gemini.api_key' => config('services.gemini.api_key')];
+        config(array_fill_keys(array_keys($keys), null));
         foreach ($claims as $claim) {
             app(GreenwashingAnalyzer::class)->analyzeClaim($claim->fresh());
         }
-        config(['services.anthropic.api_key' => $apiKey]);
+        config($keys);
     }
 
     /**
