@@ -37,6 +37,7 @@
                 <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Qualité</p>
                 <a href="{{ route('admin.alerts.index') }}" class="tv-nav-link {{ request()->routeIs('admin.alerts.*') ? 'tv-nav-link-active' : '' }}">Alertes</a>
                 <a href="{{ route('admin.ai-analyses.index') }}" class="tv-nav-link {{ request()->routeIs('admin.ai-analyses.*') ? 'tv-nav-link-active' : '' }}">Analyses IA</a>
+                <a href="{{ route('admin.ml-models.index') }}" class="tv-nav-link {{ request()->routeIs('admin.ml-models.*') ? 'tv-nav-link-active' : '' }}">Modèles ML</a>
                 <a href="{{ route('admin.reviews.index') }}" class="tv-nav-link {{ request()->routeIs('admin.reviews.*') ? 'tv-nav-link-active' : '' }}">Modération des avis</a>
                 <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Consommateurs</p>
                 <a href="{{ route('admin.consumers.index') }}" class="tv-nav-link {{ request()->routeIs('admin.consumers.*') ? 'tv-nav-link-active' : '' }}">Profils</a>

@@ -66,6 +66,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'active'
     // Administration only
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', Admin\UserController::class);
+        Route::get('ml-models', [Admin\MlModelsController::class, 'index'])->name('ml-models.index');
         Route::patch('users/{user}/block', [Admin\UserController::class, 'toggleBlock'])->name('users.block');
         Route::post('users/{user}/verification', [Admin\UserController::class, 'resendVerification'])->name('users.verification');
 

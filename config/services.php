@@ -35,6 +35,13 @@ return [
         ],
     ],
 
+    // Local Python ML service (ml/service.py): one trained model per module, no external API.
+    // Leave ML_SERVICE_URL empty to disable the predictions.
+    'ml' => [
+        'url' => env('ML_SERVICE_URL', 'http://127.0.0.1:8001'),
+        'timeout' => env('ML_SERVICE_TIMEOUT', 5),
+    ],
+
     // AI features (greenwashing analysis, product assistant).
     // AI_PROVIDER: auto (first provider with a key), anthropic or gemini.
     // Without any key, a local heuristic / factual summary is used instead.

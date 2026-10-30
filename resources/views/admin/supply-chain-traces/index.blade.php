@@ -4,6 +4,7 @@
 @section('page-title', 'Traces logistiques')
 
 @section('content')
+    @inject('ml', 'App\Services\Ml\MlService')
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <form method="GET" class="flex flex-wrap gap-2">
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher…" class="tv-input w-56">
@@ -21,7 +22,7 @@
             <table class="tv-table">
                 <thead>
                     <tr>
-                        <th>Produit</th><th>Étape</th><th>Statut</th><th>Distance (km)</th>
+                        <th>Produit</th><th>Étape</th><th>Statut</th><th>Distance (km)</th><th>Risque de retard (ML)</th>
                         <th class="text-right">Actions</th>
                     </tr>
                 </thead>
@@ -29,6 +30,13 @@
                     @forelse($items as $item)
                         <tr>
                             <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->current_stage ?? '—' }}</td><td><x-status-badge :status="$item->status ?? '—'" /></td><td>{{ $item->total_distance_km ?? '—' }}</td>
+                            <td>
+                                @php($risk = $item->status === 'in_transit' ? $ml->delayRisk($item) : null)
+                                @if($item->status === 'delayed') <x-ml-badge level="bad">Retard constaté</x-ml-badge>
+                                @elseif($risk) <x-ml-badge :level="['faible' => 'good', 'moyen' => 'warn', 'élevé' => 'bad'][$risk['level']]" title="Gradient Boosting (M3)">{{ $risk['risk'] }} % · {{ $risk['level'] }}</x-ml-badge>
+                                @else <span class="text-xs text-slate-400">—</span>
+                                @endif
+                            </td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.supply-chain-traces.show', $item) }}" class="tv-link">Voir</a>
                                 @can('update', $item)

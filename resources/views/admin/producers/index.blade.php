@@ -4,6 +4,7 @@
 @section('page-title', 'Producteurs')
 
 @section('content')
+    @inject('ml', 'App\Services\Ml\MlService')
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <form method="GET" class="flex flex-wrap gap-2">
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher…" class="tv-input w-56">
@@ -19,7 +20,7 @@
             <table class="tv-table">
                 <thead>
                     <tr>
-                        <th>Entreprise</th><th>Lieu</th><th>Méthode</th><th>Produits</th>
+                        <th>Entreprise</th><th>Lieu</th><th>Méthode</th><th>Produits</th><th>Profil ML</th>
                         <th class="text-right">Actions</th>
                     </tr>
                 </thead>
@@ -27,6 +28,7 @@
                     @forelse($items as $item)
                         <tr>
                             <td>{{ $item->company_name ?? '—' }}</td><td>{{ $item->location ?? '—' }}</td><td>{{ $item->farming_method ?? '—' }}</td><td>{{ $item->products_count ?? '—' }}</td>
+                            <td>@php($profile = $ml->producerProfile($item)) @if($profile)<x-ml-badge :title="$profile['description']">{{ $profile['label'] }}</x-ml-badge>@else<span class="text-xs text-slate-400">—</span>@endif</td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.producers.show', $item) }}" class="tv-link">Voir</a>
                                 <a href="{{ route('admin.producers.edit', $item) }}" class="tv-link ml-2">Modifier</a>

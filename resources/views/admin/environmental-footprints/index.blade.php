@@ -4,6 +4,7 @@
 @section('page-title', 'Empreintes environnementales')
 
 @section('content')
+    @inject('ml', 'App\Services\Ml\MlService')
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <form method="GET" class="flex flex-wrap gap-2">
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher…" class="tv-input w-56">
@@ -19,7 +20,7 @@
             <table class="tv-table">
                 <thead>
                     <tr>
-                        <th>Produit</th><th>CO₂ (kg)</th><th>Eau (L)</th><th>Score</th>
+                        <th>Produit</th><th>CO₂ (kg)</th><th>Eau (L)</th><th>Score</th><th>Contrôle ML</th>
                         <th class="text-right">Actions</th>
                     </tr>
                 </thead>
@@ -27,6 +28,13 @@
                     @forelse($items as $item)
                         <tr>
                             <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->co2_emissions ?? '—' }}</td><td>{{ $item->water_usage ?? '—' }}</td><td>{{ $item->ai_score ?? '—' }}</td>
+                            <td>
+                                @php($anomaly = $ml->footprintAnomaly($item))
+                                @if($anomaly === null) <span class="text-xs text-slate-400">—</span>
+                                @elseif($anomaly['is_anomaly']) <x-ml-badge level="bad" title="Isolation Forest (M5)">Atypique</x-ml-badge>
+                                @else <x-ml-badge level="good" title="Isolation Forest (M5)">Cohérente</x-ml-badge>
+                                @endif
+                            </td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.environmental-footprints.show', $item) }}" class="tv-link">Voir</a>
                                 <a href="{{ route('admin.environmental-footprints.edit', $item) }}" class="tv-link ml-2">Modifier</a>

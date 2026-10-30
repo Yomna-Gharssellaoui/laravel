@@ -6,20 +6,27 @@ use App\Models\Alert;
 use App\Models\Certificate;
 use App\Models\EnvironmentalFootprint;
 use App\Models\SupplyChainTrace;
+use App\Services\Ml\MlService;
 use Illuminate\Console\Command;
 
 class ScanAlerts extends Command
 {
     protected $signature = 'traceverte:scan-alerts {--days=30 : Warn about certificates expiring within this many days}';
 
-    protected $description = 'Expire outdated certificates and raise alerts (expired or expiring certificates, delayed traces, high footprints)';
+    protected $description = 'Expire outdated certificates and raise alerts (certificates, delays, high footprints, ML anomalies and delay risks)';
 
     public const CO2_THRESHOLD = 15;
 
+    public const DELAY_RISK_THRESHOLD = 60;
+
     private int $created = 0;
 
-    public function handle(): int
+    private MlService $ml;
+
+    public function handle(MlService $ml): int
     {
+        $this->ml = $ml;
+
         $today = now()->startOfDay();
 
         // 1. Certificates past their expiry date
@@ -57,6 +64,27 @@ class ScanAlerts extends Command
                     'Empreinte carbone élevée',
                     "{$footprint->co2_emissions} kg CO₂e/kg (seuil : ".self::CO2_THRESHOLD.').');
             });
+
+        // 5. Machine learning (local service): atypical footprints (M5) and likely delays (M3)
+        if ($this->ml->enabled()) {
+            EnvironmentalFootprint::with('product')->each(function (EnvironmentalFootprint $footprint) {
+                $anomaly = $this->ml->footprintAnomaly($footprint);
+                if ($anomaly['is_anomaly'] ?? false) {
+                    $this->raise($footprint->product_id, 'ml_footprint_anomaly', 'medium',
+                        'Empreinte atypique (détection ML)',
+                        'Score d’anomalie '.$anomaly['score'].'/100 pour la catégorie « '.$footprint->product?->category.' » (Isolation Forest, module M5).');
+                }
+            });
+
+            SupplyChainTrace::where('status', 'in_transit')->with(['product', 'distributor'])->each(function (SupplyChainTrace $trace) {
+                $risk = $this->ml->delayRisk($trace);
+                if (($risk['risk'] ?? 0) >= self::DELAY_RISK_THRESHOLD) {
+                    $this->raise($trace->product_id, 'ml_delay_risk', 'low',
+                        'Risque de retard élevé (prédiction ML)',
+                        'Trace #'.$trace->id.' : '.$risk['risk'].' % de risque de retard (Gradient Boosting, module M3).');
+                }
+            });
+        }
 
         $this->info("{$this->created} alerte(s) créée(s).");
 

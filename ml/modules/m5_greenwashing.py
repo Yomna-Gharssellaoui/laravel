@@ -18,6 +18,8 @@ des déclarations rédigées à la main (HANDWRITTEN).
 from __future__ import annotations
 
 import random
+import re
+import unicodedata
 
 import numpy as np
 import pandas as pd
@@ -179,6 +181,20 @@ def train(df: pd.DataFrame, seed: int = 42):
     return _fit(df["text"], df["greenwashing"], seed), metrics
 
 
+def _strip(word: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFKD", word.lower()) if not unicodedata.combining(c))
+
+
+def _original(term: str, text: str) -> str:
+    """The model works on accent-free words: show the expression as written in the text."""
+    words = re.findall(r"\w+", text)
+    target = term.split()
+    for i in range(len(words) - len(target) + 1):
+        if [_strip(w) for w in words[i:i + len(target)]] == target:
+            return " ".join(words[i:i + len(target)])
+    return term
+
+
 def predict(bundle, payload: dict) -> dict:
     text = (payload.get("text") or "").strip()
     probability = float(_proba(bundle, [text])[0])
@@ -195,6 +211,6 @@ def predict(bundle, payload: dict) -> dict:
     return {
         "probability": round(probability * 100, 1),
         "is_greenwashing": probability >= 0.5,
-        "risky_terms": risky,
-        "reassuring_terms": reassuring,
+        "risky_terms": [_original(t, text) for t in risky],
+        "reassuring_terms": [_original(t, text) for t in reassuring],
     }

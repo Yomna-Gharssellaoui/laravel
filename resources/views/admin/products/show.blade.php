@@ -4,6 +4,7 @@
 @section('page-title', 'Détail produit')
 
 @section('content')
+    @inject('ml', 'App\Services\Ml\MlService')
     @php
         $cascade = collect([
             'certification(s)' => $item->certificates_count,
@@ -80,6 +81,43 @@
             <div><dt>Alertes</dt><dd>{{ $item->alerts_count }}</dd></div>
         </dl>
     </div>
+
+    @php
+        $estimate = $ml->footprintEstimate($item);
+        $measured = $item->environmentalFootprint;
+        $estimatedScore = $estimate ? (new \App\Models\EnvironmentalFootprint([
+            'co2_emissions' => $estimate['co2_emissions']['value'],
+            'water_usage' => $estimate['water_usage']['value'],
+            'land_usage' => $estimate['land_usage']['value'],
+        ]))->computeScore() : null;
+        $units = ['co2_emissions' => ['CO₂', 'kg CO₂e/kg'], 'water_usage' => ['Eau', 'L/kg'], 'land_usage' => ['Sols', 'm²/kg']];
+    @endphp
+    <x-ml-card module="M1" title="Empreinte estimée par le modèle" :unavailable="$estimate === null">
+        @if($estimate)
+            <p class="mb-3 text-sm text-slate-600">Random Forest entraîné sur 3 000 produits : estimation à partir de la catégorie, du mode de culture, de la transformation, du transport et de la certification bio.</p>
+            <div class="grid gap-3 sm:grid-cols-4">
+                @foreach($units as $key => [$label, $unit])
+                    <div class="rounded-xl bg-violet-50 p-3">
+                        <p class="text-xs uppercase tracking-wide text-violet-700">{{ $label }}</p>
+                        <p class="mt-1 text-xl font-semibold text-slate-800">{{ $estimate[$key]['value'] }} <span class="text-xs font-normal">{{ $unit }}</span></p>
+                        <p class="text-xs text-slate-500">entre {{ $estimate[$key]['low'] }} et {{ $estimate[$key]['high'] }}</p>
+                        @if($measured && $measured->{$key} !== null)
+                            @php($gap = $estimate[$key]['value'] > 0 ? round(((float) $measured->{$key} / $estimate[$key]['value'] - 1) * 100) : 0)
+                            <p class="mt-1 text-xs {{ abs($gap) > 50 ? 'text-red-700 font-semibold' : 'text-slate-600' }}">Mesuré : {{ $measured->{$key} }} ({{ $gap > 0 ? '+' : '' }}{{ $gap }} %)</p>
+                        @endif
+                    </div>
+                @endforeach
+                <div class="rounded-xl bg-violet-50 p-3">
+                    <p class="text-xs uppercase tracking-wide text-violet-700">Score estimé</p>
+                    <p class="mt-1 text-xl font-semibold text-slate-800">{{ $estimatedScore }}/100</p>
+                    @if($measured)<p class="text-xs text-slate-600">Mesuré : {{ $measured->ai_score }}/100</p>@endif
+                </div>
+            </div>
+            @if(! $measured && auth()->user()->isAdmin())
+                <a class="tv-btn-secondary mt-4" href="{{ route('admin.environmental-footprints.create', ['product_id' => $item->id, 'co2_emissions' => $estimate['co2_emissions']['value'], 'water_usage' => $estimate['water_usage']['value'], 'land_usage' => $estimate['land_usage']['value']]) }}">Créer l’empreinte avec ces valeurs</a>
+            @endif
+        @endif
+    </x-ml-card>
 
     @if($item->status === 'published')
         <div class="tv-card mt-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center">

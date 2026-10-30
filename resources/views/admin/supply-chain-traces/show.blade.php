@@ -4,6 +4,7 @@
 @section('page-title', 'Détail de la trace logistique')
 
 @section('content')
+    @inject('ml', 'App\Services\Ml\MlService')
     <div class="flex gap-3 mb-6">
         @can('update', $item)
             <a href="{{ route('admin.supply-chain-traces.edit', $item) }}" class="tv-btn-primary">Modifier</a>
@@ -27,6 +28,21 @@
             <div><dt>Distance totale</dt><dd>{{ $item->total_distance_km !== null ? $item->total_distance_km.' km' : '—' }}</dd></div>
         </dl>
     </div>
+
+    @if($item->status === 'in_transit')
+        @php($risk = $ml->delayRisk($item))
+        <x-ml-card module="M3" title="Risque de retard" :unavailable="$risk === null">
+            @if($risk)
+                @php($color = ['faible' => 'bg-emerald-500', 'moyen' => 'bg-amber-400', 'élevé' => 'bg-red-500'][$risk['level']])
+                <div class="flex items-center gap-4">
+                    <p class="text-3xl font-semibold text-slate-800">{{ $risk['risk'] }} %</p>
+                    <div class="h-3 flex-1 rounded-full bg-slate-100"><div class="h-3 rounded-full {{ $color }}" style="width: {{ $risk['risk'] }}%"></div></div>
+                    <span class="text-sm font-medium">Risque {{ $risk['level'] }}</span>
+                </div>
+                <p class="mt-2 text-xs text-slate-500">Gradient Boosting entraîné sur 4 000 livraisons : distance, nombre d’étapes, étape actuelle, type de distributeur, catégorie (périssable ou non), jours en transit et mois.</p>
+            @endif
+        </x-ml-card>
+    @endif
 
     <div class="tv-card mt-6">
         <h3 class="tv-section-title">Parcours</h3>

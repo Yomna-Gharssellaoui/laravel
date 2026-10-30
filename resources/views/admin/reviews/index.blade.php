@@ -4,6 +4,7 @@
 @section('page-title', 'Avis')
 
 @section('content')
+    @inject('ml', 'App\Services\Ml\MlService')
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
         <form method="GET" class="flex flex-wrap gap-2">
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher…" class="tv-input w-56">
@@ -23,14 +24,25 @@
             <table class="tv-table">
                 <thead>
                     <tr>
-                        <th>Produit</th><th>Auteur</th><th>Note</th><th>Titre</th><th>Statut</th>
+                        <th>Produit</th><th>Auteur</th><th>Note</th><th>Analyse ML</th><th>Titre</th><th>Statut</th>
                         <th class="text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($items as $item)
                         <tr>
-                            <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->user?->name ?? '—' }}</td><td>{{ $item->rating ?? '—' }}</td><td>{{ $item->title ?? '—' }}</td><td><x-status-badge :status="$item->status ?? '—'" /></td>
+                            <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->user?->name ?? '—' }}</td><td>{{ $item->rating ?? '—' }}</td>
+                            <td class="whitespace-nowrap">
+                                @php($analysis = $ml->reviewAnalysis($item))
+                                @if($analysis)
+                                    @if($analysis['is_spam'])
+                                        <x-ml-badge level="bad" title="Probabilité de spam : {{ $analysis['spam_probability'] }} %">Spam</x-ml-badge>
+                                    @else
+                                        <x-ml-badge :level="['positif' => 'good', 'neutre' => 'warn', 'négatif' => 'bad'][$analysis['sentiment']]" title="Confiance : {{ $analysis['confidence'] }} %">{{ $analysis['sentiment'] }}</x-ml-badge>
+                                    @endif
+                                @else <span class="text-xs text-slate-400">—</span>
+                                @endif
+                            </td><td>{{ $item->title ?? '—' }}</td><td><x-status-badge :status="$item->status ?? '—'" /></td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.reviews.show', $item) }}" class="tv-link">Voir</a>
                                 @foreach(['approved' => 'Approuver', 'rejected' => 'Refuser'] as $st => $label)
