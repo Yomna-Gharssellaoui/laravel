@@ -111,6 +111,24 @@ Mot de passe : `password`
 
 Messages de validation et emails en français (`lang/fr`).
 
+## Machine learning : un modèle par module
+
+Le dossier [`ml/`](ml/README.md) contient un service Python local (scikit-learn + FastAPI) avec un modèle
+entraîné par module, **sans API externe** :
+
+| Module | Modèle |
+|---|---|
+| M1 Produits | Random Forest : estimation de l'empreinte CO₂ / eau / sols avec intervalle |
+| M2 Producteurs | K-Means : profil type du producteur |
+| M3 Logistique | Gradient Boosting : risque de retard d'une livraison en cours |
+| M4 Avis | TF-IDF + régression logistique : sentiment et spam (rejet automatique du spam) |
+| M5 Alertes | Classifieur de greenwashing explicable + Isolation Forest (empreintes atypiques) |
+| M6 Consommateurs | Filtrage collaboratif (k plus proches voisins) mêlé aux recommandations |
+
+Démarrage : voir [ml/README.md](ml/README.md) (guide Windows inclus), puis `ML_SERVICE_URL=http://127.0.0.1:8001`
+dans `.env` et `php artisan traceverte:ml-check`. Scores et descriptions : back-office → **Modèles ML**.
+Sans service ML, l'application fonctionne normalement (prédictions masquées).
+
 ## IA : détection du greenwashing
 
 `app/Services/GreenwashingAnalyzer.php` envoie la déclaration et ses preuves (certifications, empreinte,
@@ -123,6 +141,8 @@ Deux fournisseurs sont pris en charge (`app/Services/Ai`), au choix dans `.env` 
 |---|---|---|
 | Google Gemini | `GEMINI_API_KEY`, `GEMINI_MODEL` (défaut `gemini-3.8-flash`) | gratuite sur https://aistudio.google.com/apikey |
 | Anthropic Claude | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (défaut `claude-opus-5-5`) | https://console.anthropic.com |
+
+Ordre utilisé : modèle ML local (M5) s'il est démarré, puis le LLM s'il y a une clé, puis l'heuristique.
 
 `AI_PROVIDER=auto` utilise le premier fournisseur qui a une clé ; `gemini` ou `anthropic` en impose un.
 
@@ -146,7 +166,8 @@ et l'assistant répond uniquement à partir de ces données. Limité à 10 quest
 
 - `Dockerfile` multi-étapes (dépendances Composer, build Vite, PHP 8.3 + Apache) et `docker-compose.yml`
 - CI GitHub Actions (`.github/workflows/ci.yml`) : tests sur PHP 8.2 et 8.3, Pint, audit de sécurité,
-  build front, image Docker publiée sur GHCR à chaque push sur `main`
+  build front, entraînement + tests des modèles ML (pytest), images Docker (app et `ml`) publiées sur GHCR
+  à chaque push sur `main`
 - `Jenkinsfile` et `sonar-project.properties` pour une chaîne Jenkins + SonarQube
 - Workflow Git : voir [CONTRIBUTING.md](CONTRIBUTING.md)
 
@@ -154,4 +175,5 @@ et l'assistant répond uniquement à partir de ces données. Limité à 10 quest
 
 ```bash
 php artisan test
+cd ml && python -m pytest -q
 ```

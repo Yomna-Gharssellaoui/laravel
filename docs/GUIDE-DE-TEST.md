@@ -108,7 +108,8 @@ Connectez-vous avec **admin@traceverte.test**.
 php artisan traceverte:scan-alerts
 ```
 
-- [ ] Résultat : **4 alertes créées** (miel expiré, dattes expirant bientôt, jus en retard, leben empreinte élevée).
+- [ ] Résultat : **4 alertes créées** (miel expiré, dattes expirant bientôt, jus en retard, leben empreinte élevée),
+  **5 avec le service ML démarré** (+ « Empreinte atypique (détection ML) » sur le leben).
 - [ ] La certification du miel passe en **expiré**.
 - [ ] Relancez la commande → **0 alerte** (pas de doublon).
 
@@ -121,11 +122,45 @@ php artisan traceverte:scan-alerts
 | transformer@ | L’huile (qu’il transforme) | Créer un produit, changer le producteur |
 | distributor@ | Les 4 traces de Distri Nord, en créer une | Voir les traces de Sahel Logistique (dattes, harissa) |
 
-## 5. Tests automatiques
+## 5. Machine learning (un modèle par module)
+
+Démarrer le service (voir `ml/README.md`), mettre `ML_SERVICE_URL=http://127.0.0.1:8001` dans `.env`, puis :
+
+```bash
+php artisan config:clear
+php artisan traceverte:ml-check
+```
+
+- [ ] La commande affiche **7/7 modèles chargés** et leurs scores.
+- [ ] Back-office → **Modèles ML** : une carte par modèle (algorithme, taille des données, scores).
+
+| Module | Où | Résultat attendu sur le jeu de démonstration |
+|---|---|---|
+| M1 | Produits → Huile d’olive → Voir | Carte « Empreinte estimée par le modèle » : CO₂ ≈ 3,1 kg (mesuré 3,10), score estimé ≈ mesuré |
+| M1 | Produit sans empreinte → « Créer l’empreinte avec ces valeurs » | Formulaire pré-rempli avec l’estimation |
+| M2 | Producteurs | Domaine Zitouna → *Exploitation bio certifiée* ; Ferme du Cap Bon → *Petite ferme agroécologique* ; Coopérative de Béja → *Grande exploitation* |
+| M3 | Traces logistiques | Dattes (en transit) → risque ≈ 32 % *moyen* ; Harissa → ≈ 11 % *faible* ; traces livrées → « — » |
+| M4 | Modération des avis | Avis « PROMO !!! cliquez ici » → **Spam** ; les autres → positif / neutre |
+| M4 | Côté consommateur : poster l’avis « Gagnez un iPhone sur http://promo.example » | Avis enregistré directement **rejeté** |
+| M5 | Déclarations → Analyser | Moteur `ml-m5-greenwashing (scikit-learn)` ; « 100 % naturel, respectueux de la planète » → score élevé avec les expressions en cause |
+| M5 | Empreintes | Leben → **Atypique** (score ≈ 86) ; les autres → *Cohérente* |
+| M6 | Recommandations → Recalculer | Raison « des consommateurs au profil proche le notent X/5 » sur certains produits |
+
+- [ ] Arrêter le service (Ctrl+C) puis recharger ces pages : elles s’affichent normalement avec
+  « Service ML arrêté » à la place des prédictions.
+
+## 6. Tests automatiques
 
 ```bash
 php artisan test
 ```
 
-76 tests : contrôle d’accès, règles métier, 2FA, photo de profil, IA, recommandations, QR code,
-ouverture de toutes les pages et vérification des scénarios de ce guide sur ce jeu de données.
+96 tests : contrôle d’accès, règles métier, 2FA, photo de profil, IA, machine learning (service simulé),
+recommandations, QR code, ouverture de toutes les pages et vérification des scénarios de ce guide.
+
+```bash
+cd ml
+python -m pytest -q
+```
+
+Tests Python : seuil de qualité minimal de chaque modèle + tests de l’API.

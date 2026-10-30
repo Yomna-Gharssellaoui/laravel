@@ -35,6 +35,20 @@ pipeline {
             }
         }
 
+        stage('ML models') {
+            steps {
+                dir('ml') {
+                    sh 'python3 -m venv .venv && .venv/bin/pip install -q -r requirements.txt'
+                    sh '.venv/bin/python train_all.py && .venv/bin/python -m pytest -q --junitxml=../storage/logs/ml-junit.xml'
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: 'storage/logs/ml-junit.xml'
+                }
+            }
+        }
+
         stage('Front-end build') {
             steps {
                 sh 'npm run build'
@@ -53,6 +67,7 @@ pipeline {
         stage('Docker image') {
             steps {
                 sh "docker build -t ${IMAGE}:${TAG} -t ${IMAGE}:latest ."
+                sh "docker build -t ${IMAGE}-ml:${TAG} -t ${IMAGE}-ml:latest ml"
             }
         }
     }

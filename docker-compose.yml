@@ -1,7 +1,8 @@
-# Local stack: app + queue worker + scheduler + MySQL + Mailpit
+# Local stack: app + queue worker + scheduler + ML service + MySQL + Mailpit
 #   docker compose up -d --build
 #   App:     http://localhost:8000   (admin@traceverte.test / password)
 #   Emails:  http://localhost:8025   (Mailpit catches every email sent)
+#   ML:      http://localhost:8001/docs (scikit-learn models, trained at build time)
 
 x-app: &app
   build: .
@@ -21,6 +22,7 @@ x-app: &app
     MAIL_MAILER: smtp
     MAIL_HOST: mailpit
     MAIL_PORT: 1025
+    ML_SERVICE_URL: http://ml:8001
   volumes:
     - storage:/var/www/html/storage/app
   depends_on:
@@ -56,6 +58,12 @@ services:
     depends_on:
       app:
         condition: service_healthy
+
+  ml:
+    build: ./ml
+    image: trace-verte-ml:latest
+    ports:
+      - "8001:8001"
 
   mysql:
     image: mysql:8.4
