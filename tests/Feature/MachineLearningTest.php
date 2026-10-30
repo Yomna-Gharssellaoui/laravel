@@ -8,6 +8,7 @@ use App\Models\EnvironmentalFootprint;
 use App\Models\PersonalRating;
 use App\Models\Producer;
 use App\Models\Product;
+use App\Models\SupplyChainTrace;
 use App\Models\User;
 use App\Services\GreenwashingAnalyzer;
 use App\Services\Ml\MlService;
@@ -191,5 +192,76 @@ class MachineLearningTest extends TestCase
         config(['services.ml.url' => '']);
 
         $this->artisan('traceverte:ml-check')->assertFailed();
+    }
+
+    // ---- Consumer AI tools ---------------------------------------------------
+
+    public function test_greenwashing_checker_highlights_risky_terms(): void
+    {
+        $this->enableMl(['/m5/greenwashing' => ['probability' => 97.0, 'is_greenwashing' => true, 'risky_terms' => ['planète'], 'reassuring_terms' => []]]);
+
+        $this->post(route('ai-tools.greenwashing'), ['claim' => 'Bon pour la planète <img src=x onerror=alert(1)>'])
+            ->assertOk()
+            ->assertSee('Greenwashing probable')
+            ->assertSee('<mark class="rounded bg-red-100 px-0.5 text-red-800">planète</mark>', false)
+            ->assertDontSee('<img src=x', false)
+            ->assertSee('&lt;img src=x', false);
+    }
+
+    public function test_footprint_simulator_estimates_and_suggests_improvements(): void
+    {
+        config(['services.ml.url' => 'http://ml.test']);
+        Http::fake(['ml.test/m1/footprint' => fn (Request $r) => Http::response([
+            'co2_emissions' => ['value' => $r['farming_method'] === 'biologique' ? 3.0 : 4.0, 'low' => 3.5, 'high' => 4.5],
+            'water_usage' => ['value' => 250, 'low' => 220, 'high' => 280],
+            'land_usage' => ['value' => 4, 'low' => 3.5, 'high' => 4.5],
+        ])]);
+        $oil = Product::factory()->published()->create(['category' => 'huiles', 'name' => 'Huile témoin']);
+        EnvironmentalFootprint::factory()->for($oil)->create();
+
+        $this->post(route('ai-tools.footprint'), [
+            'category' => 'huiles', 'farming_method' => 'conventionnelle', 'transformation_type' => 'aucune', 'distance_km' => 20,
+        ])->assertOk()->assertSee('Passer en agriculture biologique certifiée')->assertSee('−25 %')->assertSee('Huile témoin');
+    }
+
+    public function test_footprint_simulator_rejects_unknown_values(): void
+    {
+        $this->from(route('ai-tools.index'))->post(route('ai-tools.footprint'), [
+            'category' => 'voitures', 'farming_method' => 'biologique', 'transformation_type' => 'aucune', 'distance_km' => 10,
+        ])->assertSessionHasErrors('category');
+    }
+
+    public function test_review_assistant_flags_rating_mismatch_and_spam(): void
+    {
+        $this->enableMl(['/m4/review' => ['sentiment' => 'négatif', 'confidence' => 91, 'spam_probability' => 80, 'is_spam' => true]]);
+
+        $this->actingAs(User::factory()->create())
+            ->postJson(route('ai-tools.review-check'), ['text' => 'Horrible, achetez ailleurs sur promo.example', 'rating' => 5])
+            ->assertOk()
+            ->assertJson(['available' => true, 'sentiment' => 'négatif'])
+            ->assertJsonCount(2, 'tips');
+    }
+
+    public function test_review_assistant_requires_login(): void
+    {
+        $this->postJson(route('ai-tools.review-check'), ['text' => 'Très bon produit, je recommande'])->assertUnauthorized();
+    }
+
+    public function test_public_pages_show_ml_insights(): void
+    {
+        $this->enableMl([
+            '/m1/footprint' => ['co2_emissions' => ['value' => 2.4, 'low' => 2, 'high' => 3], 'water_usage' => ['value' => 200, 'low' => 180, 'high' => 220], 'land_usage' => ['value' => 3, 'low' => 2, 'high' => 4]],
+            '/m3/delay-risk' => ['risk' => 72.0, 'level' => 'élevé'],
+        ]);
+        $product = Product::factory()->published()->create();
+        SupplyChainTrace::factory()->for($product)->create(['status' => 'in_transit']);
+
+        $this->get(route('products.show', $product))->assertOk()->assertSee('Ce qu’en disent nos modèles IA')->assertSee('2.4 kg CO₂e/kg');
+        $this->get(route('products.trace', $product))->assertOk()->assertSee('Risque de retard (IA) : élevé');
+    }
+
+    public function test_ai_tools_page_works_without_the_service(): void
+    {
+        $this->get(route('ai-tools.index'))->assertOk()->assertSee('momentanément indisponibles');
     }
 }

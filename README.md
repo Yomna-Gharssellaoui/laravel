@@ -129,6 +129,17 @@ Démarrage : voir [ml/README.md](ml/README.md) (guide Windows inclus), puis `ML_
 dans `.env` et `php artisan traceverte:ml-check`. Scores et descriptions : back-office → **Modèles ML**.
 Sans service ML, l'application fonctionne normalement (prédictions masquées).
 
+**Côté consommateur** (mêmes modèles locaux) :
+
+| Fonctionnalité | Où | Modèle |
+|---|---|---|
+| Détecteur de greenwashing : collez une allégation, les mots en cause sont surlignés | `/outils-ia` | M5 |
+| Simulateur d'empreinte : estimation, comparaison au catalogue, scénarios « et si… » chiffrés | `/outils-ia` | M1 |
+| Assistant d'écriture d'avis : ton détecté, note contradictoire, texte publicitaire | Formulaire d'avis | M4 |
+| Panneau « Ce qu'en disent nos modèles IA » : empreinte cohérente ou non, estimation indépendante, ton des avis, note prédite pour vous | Fiche produit | M5, M1, M4, M6 |
+| Crédibilité de chaque déclaration environnementale | Fiche produit | M5 |
+| Risque de retard d'une livraison en cours | Page traçabilité | M3 |
+
 ## IA : détection du greenwashing
 
 `app/Services/GreenwashingAnalyzer.php` envoie la déclaration et ses preuves (certifications, empreinte,

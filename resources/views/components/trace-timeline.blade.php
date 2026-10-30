@@ -1,3 +1,4 @@
+@inject('ml', 'App\Services\Ml\MlService')
 @if($traces->isEmpty())
     <x-empty-state title="Aucune trace" message="Le parcours de ce produit n’a pas encore été renseigné." />
 @else
@@ -9,6 +10,12 @@
                     <x-status-badge :status="$trace->status" />
                     @if($trace->total_distance_km !== null)
                         <span class="text-slate-500">{{ $trace->total_distance_km }} km parcourus</span>
+                    @endif
+                    @if($showRisk && ($risk = $ml->delayRisk($trace)))
+                        <span class="rounded-full px-2.5 py-0.5 text-xs font-medium {{ ['faible' => 'bg-emerald-100 text-emerald-800', 'moyen' => 'bg-amber-100 text-amber-800', 'élevé' => 'bg-red-100 text-red-800'][$risk['level']] ?? 'bg-slate-100 text-slate-700' }}"
+                              title="Prédiction d’un modèle de machine learning entraîné sur l’historique de livraisons">
+                            Risque de retard (IA) : {{ $risk['level'] }} · {{ number_format($risk['risk'], 0) }} %
+                        </span>
                     @endif
                 </div>
                 <ol class="relative ml-3 border-l-2 border-brand-200">

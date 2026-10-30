@@ -37,13 +37,31 @@ class MlService
     {
         $product->loadMissing(['producer', 'transformer', 'certificates', 'supplyChainTraces']);
 
-        return $this->post('/m1/footprint', [
+        return $this->estimateFootprint([
             'category' => $product->category,
             'farming_method' => $product->producer?->farming_method,
             'transformation_type' => $product->transformer?->transformation_type ?? 'aucune',
             'distance_km' => (float) ($product->supplyChainTraces->max('total_distance_km') ?? 0),
             'organic_certified' => $product->certificates->contains(fn ($c) => $c->status === 'verified' && $c->isOrganic()),
         ]);
+    }
+
+    /**
+     * @param  array{category: ?string, farming_method: ?string, transformation_type: ?string, distance_km: float, organic_certified: bool}  $features
+     */
+    public function estimateFootprint(array $features): ?array
+    {
+        return $this->post('/m1/footprint', $features);
+    }
+
+    /**
+     * Predicted rating (1-5) of one product for this consumer, from similar consumers (M6).
+     */
+    public function predictedRating(Consumer $consumer, Product $product): ?array
+    {
+        $prediction = $product->sku ? ($this->recommendations($consumer)[$product->sku] ?? null) : null;
+
+        return $prediction && ($prediction['neighbours'] ?? 0) >= 3 ? $prediction : null;
     }
 
     // ---- M2 Producteurs & Usines -------------------------------------------

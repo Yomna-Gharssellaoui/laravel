@@ -146,6 +146,19 @@ php artisan traceverte:ml-check
 | M5 | Empreintes | Leben → **Atypique** (score ≈ 86) ; les autres → *Cohérente* |
 | M6 | Recommandations → Recalculer | Raison « des consommateurs au profil proche le notent X/5 » sur certains produits |
 
+**Côté consommateur**
+
+| Où | Action | Résultat attendu |
+|---|---|---|
+| Menu **Outils IA** | Coller « Notre huile 100 % naturelle, respectueuse de la planète et neutre en carbone. » → Analyser | **Greenwashing probable** (≈ 97 %), mots surlignés en rouge |
+| Outils IA | Cliquer l’exemple « Huile certifiée bio par Ecocert… » | **Allégation plutôt vérifiable**, éléments en vert |
+| Outils IA → Simulateur | Huiles, conventionnelle, pressage à froid, 900 km → Estimer | CO₂ ≈ 3,8 kg ; scénarios : bio ≈ −22 %, circuit court ≈ −14 % ; comparaison avec l’huile du catalogue |
+| Fiche Huile d’olive (connecté consumer@) | Taper dans l’avis « Huile rance, goût horrible, très déçu » avec 5/5 | L’assistant affiche **ton négatif** et signale la **note contradictoire** |
+| Fiche Huile d’olive | Panneau violet « Ce qu’en disent nos modèles IA » | Empreinte cohérente, estimation 3,07 (déclaré 3,10), ton des avis |
+| Fiche Leben | Même panneau | **Empreinte inhabituelle** |
+| Fiche produit → Déclarations | Sous chaque déclaration | « Analyse du texte (IA) » avec le % de risque |
+| Dattes → Voir la traçabilité | Trace en transit | Badge **Risque de retard (IA) : moyen · 32 %** |
+
 - [ ] Arrêter le service (Ctrl+C) puis recharger ces pages : elles s’affichent normalement avec
   « Service ML arrêté » à la place des prédictions.
 
@@ -155,7 +168,7 @@ php artisan traceverte:ml-check
 php artisan test
 ```
 
-96 tests : contrôle d’accès, règles métier, 2FA, photo de profil, IA, machine learning (service simulé),
+103 tests : contrôle d’accès, règles métier, 2FA, photo de profil, IA, machine learning (service simulé),
 recommandations, QR code, ouverture de toutes les pages et vérification des scénarios de ce guide.
 
 ```bash

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\AiToolsController;
 use App\Http\Controllers\ConsumerController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProducerController;
@@ -41,6 +42,7 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::post('/produits/{product}/assistant', ProductAssistantController::class)
         ->middleware('throttle:10,1')
         ->name('products.assistant');
+    Route::post('/outils-ia/avis', [AiToolsController::class, 'reviewCheck'])->middleware('throttle:30,1')->name('ai-tools.review-check');
     Route::put('/avis/{review}', [ReviewController::class, 'update'])->name('reviews.update');
     Route::delete('/avis/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 });
@@ -49,6 +51,12 @@ Route::get('/produits', [ProductController::class, 'index'])->name('products.ind
 Route::get('/produits/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/produits/{product}/trace', [ProductController::class, 'trace'])->name('products.trace');
 Route::get('/produits/{product}/qr-code', [ProductController::class, 'qrCode'])->name('products.qr');
+// Consumer AI tools (local ML models)
+Route::get('/outils-ia', [AiToolsController::class, 'index'])->name('ai-tools.index');
+Route::middleware('throttle:20,1')->group(function () {
+    Route::post('/outils-ia/greenwashing', [AiToolsController::class, 'greenwashing'])->name('ai-tools.greenwashing');
+    Route::post('/outils-ia/empreinte', [AiToolsController::class, 'footprint'])->name('ai-tools.footprint');
+});
 Route::get('/producteurs', [ProducerController::class, 'index'])->name('producers.index');
 Route::get('/producteurs/{producer}', [ProducerController::class, 'show'])->name('producers.show');
 Route::get('/transformateurs', [TransformerController::class, 'index'])->name('transformers.index');
