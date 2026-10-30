@@ -4,15 +4,24 @@ Plateforme de traçabilité alimentaire : chaque produit est suivi du producteur
 avec son empreinte environnementale, ses certifications, ses déclarations environnementales et
 une détection du greenwashing par IA.
 
-Laravel 12 · Breeze (Blade) · Tailwind (back-office) · Bootstrap (site public) · SQLite par défaut.
+Laravel 12 · Breeze (Blade) · Tailwind · MySQL (SQLite possible) · service ML Python (scikit-learn).
 
 ## Installation
+
+Base de données : **MySQL** (celui de XAMPP). Démarrez MySQL dans le panneau XAMPP, puis créez la base :
+
+```bash
+mysql -u root -e "CREATE DATABASE trace_verte CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+```
+
+(ou dans phpMyAdmin : Nouvelle base → `trace_verte`, interclassement `utf8mb4_unicode_ci`). Le `.env.example`
+est réglé sur XAMPP (`root`, sans mot de passe). Pour rester en SQLite : `DB_CONNECTION=sqlite`, retirez les autres
+lignes `DB_` et créez le fichier vide `database/database.sqlite`.
 
 ```bash
 composer install
 cp .env.example .env
 php artisan key:generate
-touch database/database.sqlite
 php artisan migrate --seed
 php artisan storage:link
 npm install && npm run build
@@ -191,3 +200,6 @@ et l'assistant répond uniquement à partir de ces données. Limité à 10 quest
 php artisan test
 cd ml && python -m pytest -q
 ```
+
+Les tests utilisent une base SQLite en mémoire (rapide, sans toucher à vos données). La CI rejoue en plus toute la
+suite sur un vrai MySQL 8.4.
