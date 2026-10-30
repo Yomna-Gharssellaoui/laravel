@@ -4,6 +4,7 @@
 
 @layer base {
     :root {
+        color-scheme: light;
         --tv-brand-50: #f1f8f4;
         --tv-brand-100: #dcefe3;
         --tv-brand-500: #2f7a4c;
@@ -81,7 +82,7 @@
     }
 
     .tv-table thead {
-        @apply bg-slate-50 text-xs uppercase tracking-wide text-slate-500;
+        @apply bg-slate-50 text-xs uppercase tracking-wide text-slate-600;
     }
 
     .tv-table th {
@@ -101,7 +102,7 @@
     }
 
     .tv-dl dt {
-        @apply text-xs uppercase tracking-wide text-slate-500;
+        @apply text-xs uppercase tracking-wide text-slate-600;
     }
 
     .tv-dl dd {

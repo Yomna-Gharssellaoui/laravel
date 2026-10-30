@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Trace Verte') }} - Connexion</title>
 
@@ -23,6 +24,7 @@
             --gold-light: #e3d5b8;
             --error: #dc2626;
             --success: #16a34a;
+            --moss-text: #4f6b5a;
 
             --font-display: 'Cormorant', serif;
             --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -33,37 +35,7 @@
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) {
-                --forest-midnight: #e8f1ed;
-                --sage-deep: #b8cec0;
-                --moss-medium: #7d9d88;
-                --sage-light: #4a6357;
-                --mist: #2a3d35;
-                --cream: #1a2821;
-                --earth-dark: #faf9f6;
-                --gold-accent: #e3d5b8;
-                --gold-light: #9d866d;
-                --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
-                --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.5);
-                color-scheme: dark;
-            }
-        }
-
-        :root[data-theme="dark"] {
-            --forest-midnight: #e8f1ed;
-            --sage-deep: #b8cec0;
-            --moss-medium: #7d9d88;
-            --sage-light: #4a6357;
-            --mist: #2a3d35;
-            --cream: #1a2821;
-            --earth-dark: #faf9f6;
-            --gold-accent: #e3d5b8;
-            --gold-light: #9d866d;
-            --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
-            --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.5);
-            color-scheme: dark;
-        }
+        /* Light theme only, like the rest of the site (a partial dark palette made text unreadable) */
 
         * {
             margin: 0;
@@ -97,7 +69,7 @@
         }
 
         .auth-visual {
-            background: linear-gradient(135deg, var(--sage-deep), var(--moss-medium));
+            background: linear-gradient(135deg, var(--forest-midnight), var(--sage-deep));
             padding: 3rem;
             display: flex;
             flex-direction: column;
@@ -210,7 +182,7 @@
         }
 
         .form-input::placeholder {
-            color: var(--moss-medium);
+            color: var(--moss-text);
         }
 
         .form-error {
@@ -245,7 +217,7 @@
         .btn-primary {
             width: 100%;
             padding: 1rem;
-            background: linear-gradient(135deg, var(--sage-deep), var(--moss-medium));
+            background: linear-gradient(135deg, var(--forest-midnight), var(--sage-deep));
             color: white;
             border: none;
             border-radius: 12px;

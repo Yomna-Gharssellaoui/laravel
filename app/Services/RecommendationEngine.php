@@ -5,15 +5,22 @@ namespace App\Services;
 use App\Models\Consumer;
 use App\Models\PersonalRating;
 use App\Models\Product;
+use App\Services\Ml\MlService;
 use Illuminate\Support\Str;
 
 /**
  * Computes a 0-100 personalised score for every published product,
  * from the consumer's preferences and allergies and the product's evidence
- * (footprint, certifications, open alerts, reviews).
+ * (footprint, certifications, open alerts, reviews), blended with the rating predicted by
+ * the collaborative-filtering model of module M6 when the ML service is running.
  */
 class RecommendationEngine
 {
+    public function __construct(private ?MlService $ml = null)
+    {
+        $this->ml ??= app(MlService::class);
+    }
+
     public const LOCAL_ORIGINS = ['france', 'tunisie'];
 
     public function recompute(Consumer $consumer): int
@@ -22,8 +29,12 @@ class RecommendationEngine
             ->with(['environmentalFootprint', 'certificates', 'openAlerts', 'approvedReviews'])
             ->get();
 
+        // Collaborative filtering (module M6): predicted rating per product SKU, from similar consumers
+        $collaborative = $this->ml->recommendations($consumer) ?? [];
+
         foreach ($products as $product) {
             [$score, $reasons] = $this->score($consumer, $product);
+            [$score, $reasons] = $this->blendCollaborative($score, $reasons, $collaborative[$product->sku] ?? null);
 
             PersonalRating::updateOrCreate(
                 ['consumer_id' => $consumer->id, 'product_id' => $product->id],
@@ -41,6 +52,23 @@ class RecommendationEngine
             ->delete();
 
         return $products->count();
+    }
+
+    /**
+     * 50 % rules (preferences, evidence) + 50 % predicted rating of similar consumers.
+     * A product excluded by an allergen stays at 0.
+     */
+    private function blendCollaborative(int $score, array $reasons, ?array $prediction): array
+    {
+        if ($score === 0 || $prediction === null || ! empty($prediction['rated']) || ($prediction['neighbours'] ?? 0) < 3) {
+            return [$score, $reasons];
+        }
+
+        $predicted = (float) $prediction['rating'];
+        $blended = (int) round(0.5 * $score + 0.5 * ($predicted - 1) / 4 * 100);
+        $reasons[] = 'des consommateurs au profil proche le notent '.number_format($predicted, 1, ',', '').'/5';
+
+        return [max(0, min(100, $blended)), $reasons];
     }
 
     public function recomputeAll(): int
@@ -73,8 +101,7 @@ class RecommendationEngine
         $score = $footprint?->ai_score ?? 50;
 
         if ($preferences->contains('bio')) {
-            $isOrganic = $product->certificates->contains(fn ($c) => $c->status === 'verified'
-                && Str::contains(Str::lower($c->certificate_type), ['bio', 'ab', 'organic', 'ecocert']));
+            $isOrganic = $product->certificates->contains(fn ($c) => $c->status === 'verified' && $c->isOrganic());
             $score += $isOrganic ? 15 : -5;
             $reasons[] = $isOrganic ? 'certification bio vérifiée' : 'pas de certification bio vérifiée';
         }

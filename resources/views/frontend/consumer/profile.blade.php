@@ -10,16 +10,22 @@
             <a href="{{ route('consumer.recommendations') }}" class="tv-btn-primary">Voir mes recommandations</a>
             <a href="{{ route('consumer.edit') }}" class="tv-btn-secondary">Modifier mes préférences</a>
             <a href="{{ route('profile.edit') }}" class="tv-btn-secondary">Mon compte (email, mot de passe)</a>
+            @if(auth()->user()->role === 'consumer')
+                @php $proRequest = auth()->user()->pendingProAccountRequest(); @endphp
+                <a href="{{ route('pro-account.create') }}" class="tv-btn-secondary">
+                    {{ $proRequest ? 'Ma demande de compte pro (en attente)' : 'Demander un compte professionnel' }}
+                </a>
+            @endif
         </div>
 
         <div class="grid gap-6 lg:grid-cols-3">
             <div class="tv-card">
                 <h2 class="tv-section-title">Informations</h2>
                 <dl class="space-y-4 text-sm">
-                    <div><dt class="text-xs uppercase tracking-wide text-slate-500">Nom</dt><dd class="mt-1 font-semibold text-slate-800">{{ auth()->user()->name }}</dd></div>
-                    <div><dt class="text-xs uppercase tracking-wide text-slate-500">Email</dt><dd class="mt-1 font-semibold text-slate-800">{{ auth()->user()->email }}</dd></div>
-                    <div><dt class="text-xs uppercase tracking-wide text-slate-500">Niveau de durabilité</dt><dd class="mt-1 font-semibold text-slate-800">{{ $consumer->sustainability_level ?? '—' }}</dd></div>
-                    <div><dt class="text-xs uppercase tracking-wide text-slate-500">Budget</dt><dd class="mt-1 font-semibold text-slate-800">{{ $consumer->budget_range ?? '—' }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-600">Nom</dt><dd class="mt-1 font-semibold text-slate-800">{{ auth()->user()->name }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-600">Email</dt><dd class="mt-1 font-semibold text-slate-800">{{ auth()->user()->email }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-600">Niveau de durabilité</dt><dd class="mt-1 font-semibold text-slate-800">{{ $consumer->sustainability_level ?? '—' }}</dd></div>
+                    <div><dt class="text-xs uppercase tracking-wide text-slate-600">Budget</dt><dd class="mt-1 font-semibold text-slate-800">{{ $consumer->budget_range ?? '—' }}</dd></div>
                 </dl>
             </div>
 
@@ -34,11 +40,11 @@
                 </div>
                 <div class="mt-6 grid gap-4 sm:grid-cols-2">
                     <div class="rounded-xl border border-slate-200 p-4">
-                        <p class="text-xs uppercase tracking-wide text-slate-500">Restrictions alimentaires</p>
+                        <p class="text-xs uppercase tracking-wide text-slate-600">Restrictions alimentaires</p>
                         <p class="mt-2 text-slate-800">{{ implode(', ', $consumer->dietary_restrictions ?? []) ?: 'Aucune' }}</p>
                     </div>
                     <div class="rounded-xl border border-slate-200 p-4">
-                        <p class="text-xs uppercase tracking-wide text-slate-500">Allergies</p>
+                        <p class="text-xs uppercase tracking-wide text-slate-600">Allergies</p>
                         <p class="mt-2 text-slate-800">{{ implode(', ', $consumer->allergies ?? []) ?: 'Aucune' }}</p>
                     </div>
                 </div>

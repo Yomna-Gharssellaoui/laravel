@@ -39,6 +39,15 @@ class Certificate extends Model
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * Organic certification (Bio, AB, Ecocert, organic), matched on whole words:
+     * "Label Rouge" must not count as "AB".
+     */
+    public function isOrganic(): bool
+    {
+        return preg_match('/\b(bio|ab|organic|ecocert)\b/iu', $this->certificate_type ?? '') === 1;
+    }
+
     public function isExpired(): bool
     {
         return $this->expiry_date !== null && $this->expiry_date->isPast();

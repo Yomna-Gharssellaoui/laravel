@@ -42,7 +42,7 @@
         <h3 class="tv-section-title">Analyse de greenwashing</h3>
         @if($analysis = $item->aiAnalyses->first())
             <div class="text-sm space-y-2">
-                <p><span class="font-semibold">Risque : {{ $analysis->greenwashing_score }}/100</span> · crédibilité {{ $analysis->credibility_rating }} · <span class="text-slate-500">{{ $analysis->model_used }}, {{ $analysis->created_at->diffForHumans() }}</span></p>
+                <p><span class="font-semibold">Risque : {{ $analysis->greenwashing_score }}/100</span> · crédibilité {{ $analysis->credibility_rating }} · <span class="text-slate-600">{{ $analysis->model_used }}, {{ $analysis->created_at->diffForHumans() }}</span></p>
                 <p class="text-slate-700">{{ $analysis->ai_summary }}</p>
                 @if(! empty($analysis->red_flags))
                     <ul class="list-disc pl-5 text-red-700">

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Trace Verte') — Traçabilité alimentaire</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -23,6 +24,7 @@
                 <a href="{{ route('products.index') }}" class="text-sm font-medium {{ request()->routeIs('products.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Produits</a>
                 <a href="{{ route('producers.index') }}" class="text-sm font-medium {{ request()->routeIs('producers.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Producteurs</a>
                 <a href="{{ route('transformers.index') }}" class="text-sm font-medium {{ request()->routeIs('transformers.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Transformateurs</a>
+                <a href="{{ route('ai-tools.index') }}" class="text-sm font-medium {{ request()->routeIs('ai-tools.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Outils IA</a>
 
                 <form action="{{ route('products.index') }}" method="GET" class="flex" role="search">
                     <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher un produit…" aria-label="Rechercher" class="tv-input w-full lg:w-56">
@@ -65,6 +67,7 @@
                     <li><a class="hover:underline" href="{{ route('products.index') }}">Produits</a></li>
                     <li><a class="hover:underline" href="{{ route('producers.index') }}">Producteurs</a></li>
                     <li><a class="hover:underline" href="{{ route('transformers.index') }}">Transformateurs</a></li>
+                    <li><a class="hover:underline" href="{{ route('ai-tools.index') }}">Outils IA</a></li>
                 </ul>
             </div>
             <div>

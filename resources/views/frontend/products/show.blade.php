@@ -3,6 +3,7 @@
 @section('title', $product->name)
 
 @section('content')
+    @inject('ml', 'App\Services\Ml\MlService')
     <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div class="mb-6 flex flex-wrap gap-3">
             <a href="{{ route('products.index') }}" class="tv-btn-secondary">Retour au catalogue</a>
@@ -83,7 +84,7 @@
 
                         <div class="mt-6 border-t border-slate-100 pt-5">
                             @auth
-                                @php($mine = $product->reviews()->where('user_id', auth()->id())->first())
+                                @php $mine = $product->reviews()->where('user_id', auth()->id())->first(); @endphp
                                 @if($product->status !== 'published')
                                     <p class="text-sm text-slate-600">Les avis sont ouverts une fois le produit publié.</p>
                                 @elseif(! auth()->user()->hasVerifiedEmail())
@@ -91,7 +92,7 @@
                                 @else
                                     <h3 class="text-base font-semibold text-slate-800">{{ $mine ? 'Modifier mon avis' : 'Donner mon avis' }}</h3>
                                     @if($mine)
-                                        <p class="mt-1 text-xs text-slate-500">Statut : {{ $mine->status === 'approved' ? 'publié' : ($mine->status === 'rejected' ? 'refusé par la modération' : 'en attente de modération') }}</p>
+                                        <p class="mt-1 text-xs text-slate-600">Statut : {{ $mine->status === 'approved' ? 'publié' : ($mine->status === 'rejected' ? 'refusé par la modération' : 'en attente de modération') }}</p>
                                     @endif
                                     <form method="POST" action="{{ $mine ? route('reviews.update', $mine) : route('reviews.store', $product) }}" class="mt-3 space-y-3">
                                         @csrf
@@ -105,10 +106,48 @@
                                             <input type="text" name="title" value="{{ old('title', $mine?->title) }}" maxlength="255" placeholder="Titre" class="tv-input flex-1">
                                         </div>
                                         <textarea name="comment" rows="3" maxlength="2000" placeholder="Votre avis" class="tv-input w-full">{{ old('comment', $mine?->comment) }}</textarea>
+                                        <div class="hidden rounded-xl border border-violet-200 bg-violet-50 p-3 text-sm" data-review-assistant aria-live="polite"></div>
                                         <div class="flex gap-3">
                                             <button type="submit" class="tv-btn-primary">{{ $mine ? 'Mettre à jour' : 'Envoyer' }}</button>
                                         </div>
                                     </form>
+                                    <script>
+                                        (() => {
+                                            const box = document.querySelector('[data-review-assistant]');
+                                            const form = box.closest('form');
+                                            const labels = { positif: 'positif', neutre: 'neutre', 'négatif': 'négatif' };
+                                            let timer;
+                                            const check = async () => {
+                                                const text = [form.title.value, form.comment.value].filter(Boolean).join('. ');
+                                                if (text.length < 10) { box.classList.add('hidden'); return; }
+                                                try {
+                                                    const response = await fetch(@json(route('ai-tools.review-check')), {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                                                        body: JSON.stringify({ text, rating: Number(form.rating.value) }),
+                                                    });
+                                                    const data = await response.json();
+                                                    if (! response.ok || ! data.available) { box.classList.add('hidden'); return; }
+                                                    box.replaceChildren();
+                                                    const line = document.createElement('p');
+                                                    line.className = 'text-violet-900';
+                                                    line.textContent = `Assistant IA : ton ${labels[data.sentiment] ?? data.sentiment} détecté (${Math.round(data.confidence)} %).`;
+                                                    box.appendChild(line);
+                                                    data.tips.forEach((tip) => {
+                                                        const el = document.createElement('p');
+                                                        el.className = 'mt-1 font-medium text-amber-800';
+                                                        el.textContent = tip;
+                                                        box.appendChild(el);
+                                                    });
+                                                    box.classList.remove('hidden');
+                                                } catch { box.classList.add('hidden'); }
+                                            };
+                                            const schedule = () => { clearTimeout(timer); timer = setTimeout(check, 600); };
+                                            form.comment.addEventListener('input', schedule);
+                                            form.title.addEventListener('input', schedule);
+                                            form.rating.addEventListener('change', check);
+                                        })();
+                                    </script>
                                     @if($mine)
                                         <form method="POST" action="{{ route('reviews.destroy', $mine) }}" class="mt-2" onsubmit="return confirm('Supprimer votre avis ?');">
                                             @csrf @method('DELETE')
@@ -140,6 +179,19 @@
 
                                         <p class="mt-3 text-sm text-slate-700">{{ $claim->description }}</p>
 
+                                        @php $gw = $ml->greenwashing($claim); @endphp
+                                        @if($gw)
+                                            <div class="mt-3 rounded-xl bg-white p-3 text-xs">
+                                                <span class="font-semibold {{ $gw['probability'] >= 65 ? 'text-red-700' : ($gw['probability'] >= 35 ? 'text-amber-800' : 'text-emerald-700') }}">
+                                                    Analyse du texte (IA) : {{ $gw['probability'] >= 65 ? 'formulation vague' : ($gw['probability'] >= 35 ? 'à vérifier' : 'formulation vérifiable') }}
+                                                    · {{ number_format($gw['probability'], 0) }} % de risque de greenwashing
+                                                </span>
+                                                @if($gw['risky_terms'] && $gw['probability'] >= 35)
+                                                    <span class="text-slate-600">— termes en cause : {{ implode(', ', $gw['risky_terms']) }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
+
                                         <div class="mt-3 flex flex-wrap gap-4 text-xs text-slate-600">
                                             <span>Confiance: {{ $claim->confidence_score ?? 0 }}%</span>
                                             <span>Document: {{ $claim->source_document ?? 'Non référencé' }}</span>
@@ -151,7 +203,7 @@
                                                     <div class="rounded-xl bg-white p-3">
                                                         <div class="flex items-center justify-between gap-2">
                                                             <span class="text-sm font-medium text-slate-700">{{ ucfirst(str_replace('_', ' ', $check->check_type ?? 'vérification')) }}</span>
-                                                            <span class="text-xs font-medium {{ $check->status === 'passed' ? 'text-emerald-700' : ($check->status === 'failed' ? 'text-red-700' : 'text-amber-700') }}">
+                                                            <span class="text-xs font-medium {{ $check->status === 'passed' ? 'text-emerald-700' : ($check->status === 'failed' ? 'text-red-700' : 'text-amber-800') }}">
                                                                 {{ str_replace('_', ' ', $check->status) }}
                                                             </span>
                                                         </div>
@@ -176,13 +228,13 @@
                                     <div class="rounded-xl border border-slate-200 p-3">
                                         <div class="flex items-center justify-between gap-3">
                                             <span class="text-sm font-medium text-slate-700">{{ ucfirst(str_replace('_', ' ', $check->check_type ?? 'vérification')) }}</span>
-                                            <span class="text-xs font-medium {{ $check->status === 'passed' ? 'text-emerald-700' : ($check->status === 'failed' ? 'text-red-700' : 'text-amber-700') }}">
+                                            <span class="text-xs font-medium {{ $check->status === 'passed' ? 'text-emerald-700' : ($check->status === 'failed' ? 'text-red-700' : 'text-amber-800') }}">
                                                 {{ str_replace('_', ' ', $check->status) }}
                                             </span>
                                         </div>
                                         <p class="mt-2 text-sm text-slate-600">{{ $check->result_summary }}</p>
                                         @if($check->environmentalClaim)
-                                            <p class="mt-2 text-xs text-slate-500">Déclaration: {{ $check->environmentalClaim->title }}</p>
+                                            <p class="mt-2 text-xs text-slate-600">Déclaration: {{ $check->environmentalClaim->title }}</p>
                                         @endif
                                     </div>
                                 @endforeach
@@ -266,15 +318,62 @@
                         </div>
                     @endif
 
+                    @php
+                        $footprint = $product->environmentalFootprint;
+                        $anomaly = $footprint ? $ml->footprintAnomaly($footprint) : null;
+                        $estimate = $ml->footprintEstimate($product);
+                        $sentiments = $product->approvedReviews->map(fn ($r) => $ml->reviewAnalysis($r)['sentiment'] ?? null)->filter()->countBy();
+                        $consumer = auth()->user()?->consumer;
+                        $predicted = $consumer ? $ml->predictedRating($consumer, $product) : null;
+                    @endphp
+                    @if($anomaly || $estimate || $sentiments->isNotEmpty() || $predicted)
+                        <div class="tv-card border-l-4 border-violet-400">
+                            <h2 class="tv-section-title">Ce qu’en disent nos modèles IA</h2>
+                            <ul class="space-y-3 text-sm text-slate-700">
+                                @if($predicted)
+                                    <li class="rounded-xl bg-violet-50 p-3">
+                                        <span class="font-semibold text-violet-900">Pour vous : {{ number_format($predicted['rating'], 1, ',', '') }}/5</span><br>
+                                        <span class="text-xs text-slate-600">Note moyenne donnée par {{ $predicted['neighbours'] }} consommateurs aux goûts proches des vôtres.</span>
+                                    </li>
+                                @endif
+                                @if($anomaly)
+                                    <li>
+                                        @if($anomaly['is_anomaly'])
+                                            <span class="font-semibold text-amber-800">Empreinte inhabituelle</span> pour un produit « {{ $product->category }} » : les valeurs déclarées sont en cours de vérification.
+                                        @else
+                                            <span class="font-semibold text-emerald-700">Empreinte cohérente</span> avec les produits de la même catégorie.
+                                        @endif
+                                    </li>
+                                @endif
+                                @if($estimate)
+                                    <li>
+                                        Estimation indépendante : <strong>{{ $estimate['co2_emissions']['value'] }} kg CO₂e/kg</strong>
+                                        @if($footprint?->co2_emissions !== null)
+                                            (déclaré : {{ $footprint->co2_emissions }})
+                                        @else
+                                            <span class="text-xs text-slate-600">(empreinte non encore mesurée)</span>
+                                        @endif
+                                    </li>
+                                @endif
+                                @if($sentiments->isNotEmpty())
+                                    <li>
+                                        Ton des avis :
+                                        <span class="text-emerald-700">{{ $sentiments['positif'] ?? 0 }} positif(s)</span> ·
+                                        <span class="text-amber-800">{{ $sentiments['neutre'] ?? 0 }} neutre(s)</span> ·
+                                        <span class="text-red-700">{{ $sentiments['négatif'] ?? 0 }} négatif(s)</span>
+                                    </li>
+                                @endif
+                            </ul>
+                            <p class="mt-3 text-xs text-slate-600">Modèles de machine learning exécutés par Trace Verte. <a href="{{ route('ai-tools.index') }}" class="tv-link">Essayer les outils IA</a></p>
+                        </div>
+                    @endif
+
                     <div class="tv-card">
                         <h2 class="tv-section-title">Alertes publiques</h2>
                         @if($product->openAlerts->isNotEmpty())
                             @foreach($product->openAlerts as $alert)
                                 <div class="mb-3 rounded-xl border border-red-100 bg-red-50 p-3">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <x-alert-badge :alert="$alert" />
-                                        <span class="text-xs text-red-700">{{ $alert->severity }}</span>
-                                    </div>
+                                    <x-alert-badge :alert="$alert" />
                                     <p class="mt-2 text-sm font-medium text-slate-800">{{ $alert->title }}</p>
                                 </div>
                             @endforeach
@@ -292,7 +391,7 @@
                                         <span class="text-sm font-medium text-slate-700">{{ $analysis->analysis_type ?? 'Analyse' }}</span>
                                         <x-footprint-score :score="(int) ($analysis->greenwashing_score ?? 0)" />
                                     </div>
-                                    <p class="mt-2 text-xs text-slate-500">Modèle : {{ $analysis->model_used ?? 'Démonstration' }}</p>
+                                    <p class="mt-2 text-xs text-slate-600">Modèle : {{ $analysis->model_used ?? 'Démonstration' }}</p>
                                 </div>
                             @endforeach
                         @else

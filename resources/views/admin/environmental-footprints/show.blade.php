@@ -4,6 +4,7 @@
 @section('page-title', 'Détail empreinte')
 
 @section('content')
+    @inject('ml', 'App\Services\Ml\MlService')
     <div class="flex gap-3 mb-6">
         <a href="{{ route('admin.environmental-footprints.edit', $item) }}" class="tv-btn-primary">Modifier</a>
         <a href="{{ route('admin.environmental-footprints.index') }}" class="tv-btn-secondary">Retour</a>
@@ -24,4 +25,23 @@
         </dl>
     </div>
     
+    @php($anomaly = $ml->footprintAnomaly($item))
+    @php($labels = ['co2_emissions' => 'CO₂', 'water_usage' => 'Eau', 'land_usage' => 'Sols'])
+    <x-ml-card module="M5" title="Détection d’anomalie" :unavailable="$anomaly === null">
+        @if($anomaly)
+            <p class="text-sm">
+                @if($anomaly['is_anomaly'])
+                    <span class="font-semibold text-red-700">Empreinte atypique pour la catégorie « {{ $item->product?->category }} »</span> (score d’anomalie {{ $anomaly['score'] }}/100) :
+                    l’indicateur le plus éloigné est <strong>{{ $labels[$anomaly['main_indicator']] }}</strong>. Vérifiez la saisie ou demandez un justificatif.
+                @else
+                    <span class="font-semibold text-emerald-700">Empreinte cohérente</span> avec les produits de la même catégorie (score d’anomalie {{ $anomaly['score'] }}/100).
+                @endif
+            </p>
+            <div class="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
+                @foreach($anomaly['ratio_to_category_median'] as $key => $ratio)
+                    <div class="rounded-lg bg-violet-50 p-3"><span class="text-slate-600">{{ $labels[$key] }}</span><br><strong>× {{ $ratio }}</strong> la médiane de la catégorie</div>
+                @endforeach
+            </div>
+        @endif
+    </x-ml-card>
 @endsection

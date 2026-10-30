@@ -4,32 +4,31 @@ Plateforme de traçabilité alimentaire : chaque produit est suivi du producteur
 avec son empreinte environnementale, ses certifications, ses déclarations environnementales et
 une détection du greenwashing par IA.
 
-Laravel 12 · Breeze (Blade) · Tailwind (back-office) · Bootstrap (site public) · SQLite par défaut.
+Laravel 12 · Breeze (Blade) · Tailwind · MySQL (SQLite possible) · service ML Python (scikit-learn).
 
 ## Installation
+
+Base de données : **MySQL** (celui de XAMPP). Démarrez MySQL dans le panneau XAMPP, puis créez la base :
+
+```bash
+mysql -u root -e "CREATE DATABASE trace_verte CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+```
+
+(ou dans phpMyAdmin : Nouvelle base → `trace_verte`, interclassement `utf8mb4_unicode_ci`). Le `.env.example`
+est réglé sur XAMPP (`root`, sans mot de passe). Pour rester en SQLite : `DB_CONNECTION=sqlite`, retirez les autres
+lignes `DB_` et créez le fichier vide `database/database.sqlite`.
 
 ```bash
 composer install
 cp .env.example .env
 php artisan key:generate
-touch database/database.sqlite
 php artisan migrate --seed
 php artisan storage:link
 npm install && npm run build
 composer dev   # serveur + worker de file d'attente + logs + Vite
 ```
 
-### Avec Docker (app + file d'attente + planificateur + MySQL + Mailpit)
-
-```bash
-cp .env.example .env        # puis renseigner APP_KEY (php artisan key:generate --show)
-docker compose up -d --build
-```
-
-- Application : http://localhost:8000
-- Emails envoyés (vérification, mot de passe oublié, alertes) : http://localhost:8025
-
-### Recevoir les emails en local sans Docker
+### Recevoir les emails en local
 
 Par défaut (`MAIL_MAILER=log`) les emails sont écrits dans `storage/logs/laravel.log`.
 Pour les recevoir réellement, utilisez un compte gratuit [Mailtrap](https://mailtrap.io) (Email Testing)
@@ -68,6 +67,8 @@ Mot de passe : `password`
 | producer2@traceverte.test | producer | un autre producteur (dattes) |
 | consumer@traceverte.test | consumer | site public, avis, recommandations |
 | sara@traceverte.test | consumer | allergique au gluten |
+| karim@traceverte.test | consumer | auteur de l'avis spam |
+| candidat@traceverte.test | consumer | demande de compte producteur en attente |
 | nouveau@traceverte.test | consumer | email non vérifié |
 | bloque@traceverte.test | consumer | compte suspendu |
 
@@ -108,8 +109,38 @@ Mot de passe : `password`
 | 2FA | TOTP via Laravel **Fortify** : QR code, confirmation par un premier code, 8 codes de récupération, activation et désactivation par l'utilisateur, étape de code à la connexion |
 | Profil | Nom, email, mot de passe, **photo de profil**, suppression du compte |
 | Administration | CRUD des comptes, changement de rôle, suspension, renvoi de l'email de vérification |
+| Demande de compte professionnel | Bouton « Demander un compte professionnel » (Mon espace, Mon compte, accueil) : formulaire avec justificatif privé, email aux admins, validation ou refus motivé par un admin, rôle et fiche acteur créés à l'acceptation, email de décision |
 
 Messages de validation et emails en français (`lang/fr`).
+
+## Machine learning : un modèle par module
+
+Le dossier [`ml/`](ml/README.md) contient un service Python local (scikit-learn + FastAPI) avec un modèle
+entraîné par module, **sans API externe** :
+
+| Module | Modèle |
+|---|---|
+| M1 Produits | Random Forest : estimation de l'empreinte CO₂ / eau / sols avec intervalle |
+| M2 Producteurs | K-Means : profil type du producteur |
+| M3 Logistique | Gradient Boosting : risque de retard d'une livraison en cours |
+| M4 Avis | TF-IDF + régression logistique : sentiment et spam (rejet automatique du spam) |
+| M5 Alertes | Classifieur de greenwashing explicable + Isolation Forest (empreintes atypiques) |
+| M6 Consommateurs | Filtrage collaboratif (k plus proches voisins) mêlé aux recommandations |
+
+Démarrage : voir [ml/README.md](ml/README.md) (guide Windows inclus), puis `ML_SERVICE_URL=http://127.0.0.1:8001`
+dans `.env` et `php artisan traceverte:ml-check`. Scores et descriptions : back-office → **Modèles ML**.
+Sans service ML, l'application fonctionne normalement (prédictions masquées).
+
+**Côté consommateur** (mêmes modèles locaux) :
+
+| Fonctionnalité | Où | Modèle |
+|---|---|---|
+| Détecteur de greenwashing : collez une allégation, les mots en cause sont surlignés | `/outils-ia` | M5 |
+| Simulateur d'empreinte : estimation, comparaison au catalogue, scénarios « et si… » chiffrés | `/outils-ia` | M1 |
+| Assistant d'écriture d'avis : ton détecté, note contradictoire, texte publicitaire | Formulaire d'avis | M4 |
+| Panneau « Ce qu'en disent nos modèles IA » : empreinte cohérente ou non, estimation indépendante, ton des avis, note prédite pour vous | Fiche produit | M5, M1, M4, M6 |
+| Crédibilité de chaque déclaration environnementale | Fiche produit | M5 |
+| Risque de retard d'une livraison en cours | Page traçabilité | M3 |
 
 ## IA : détection du greenwashing
 
@@ -123,6 +154,8 @@ Deux fournisseurs sont pris en charge (`app/Services/Ai`), au choix dans `.env` 
 |---|---|---|
 | Google Gemini | `GEMINI_API_KEY`, `GEMINI_MODEL` (défaut `gemini-3.8-flash`) | gratuite sur https://aistudio.google.com/apikey |
 | Anthropic Claude | `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` (défaut `claude-opus-5-5`) | https://console.anthropic.com |
+
+Ordre utilisé : modèle ML local (M5) s'il est démarré, puis le LLM s'il y a une clé, puis l'heuristique.
 
 `AI_PROVIDER=auto` utilise le premier fournisseur qui a une clé ; `gemini` ou `anthropic` en impose un.
 
@@ -142,16 +175,15 @@ et l'assistant répond uniquement à partir de ces données. Limité à 10 quest
 - Files d'attente (analyse IA des déclarations), tâches planifiées, notifications email
 - Recommandations personnalisées calculées, téléversement de fichiers, tableau de bord avec graphiques
 
-## DevOps
+## Git
 
-- `Dockerfile` multi-étapes (dépendances Composer, build Vite, PHP 8.3 + Apache) et `docker-compose.yml`
-- CI GitHub Actions (`.github/workflows/ci.yml`) : tests sur PHP 8.2 et 8.3, Pint, audit de sécurité,
-  build front, image Docker publiée sur GHCR à chaque push sur `main`
-- `Jenkinsfile` et `sonar-project.properties` pour une chaîne Jenkins + SonarQube
-- Workflow Git : voir [CONTRIBUTING.md](CONTRIBUTING.md)
+Workflow Git (branches, messages de commit, pull requests) : voir [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Tests
 
 ```bash
 php artisan test
+cd ml && python -m pytest -q
 ```
+
+Les tests utilisent une base SQLite en mémoire (rapide, sans toucher à vos données).

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
     <meta name="claude:viewport-fit-sides" content="cover">
     <title>Trace Verte - Transparence Environnementale</title>
 
@@ -26,6 +27,8 @@
             --gold-accent: #c4a572;
             --gold-light: #e3d5b8;
             --terracotta: #c87f5e;
+            --gold-text: #7a5c28;
+            --moss-text: #4f6b5a;
 
             /* Typography */
             --font-display: 'Cormorant', serif;
@@ -46,39 +49,7 @@
             --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root:not([data-theme="light"]) {
-                --forest-midnight: #e8f1ed;
-                --sage-deep: #b8cec0;
-                --moss-medium: #7d9d88;
-                --sage-light: #4a6357;
-                --mist: #2a3d35;
-                --cream: #1a2821;
-                --earth-dark: #faf9f6;
-                --gold-accent: #e3d5b8;
-                --gold-light: #9d866d;
-                --terracotta: #e39d82;
-                --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
-                --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.5);
-                color-scheme: dark;
-            }
-        }
-
-        :root[data-theme="dark"] {
-            --forest-midnight: #e8f1ed;
-            --sage-deep: #b8cec0;
-            --moss-medium: #7d9d88;
-            --sage-light: #4a6357;
-            --mist: #2a3d35;
-            --cream: #1a2821;
-            --earth-dark: #faf9f6;
-            --gold-accent: #e3d5b8;
-            --gold-light: #9d866d;
-            --terracotta: #e39d82;
-            --shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.3);
-            --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.5);
-            color-scheme: dark;
-        }
+        /* Light theme only, like the rest of the site (a partial dark palette made text unreadable) */
 
         * {
             margin: 0;
@@ -132,7 +103,7 @@
         .logo-icon {
             width: 32px;
             height: 32px;
-            background: linear-gradient(135deg, var(--sage-deep), var(--moss-medium));
+            background: linear-gradient(135deg, var(--forest-midnight), var(--sage-deep));
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -175,7 +146,7 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--sage-deep), var(--moss-medium));
+            background: linear-gradient(135deg, var(--forest-midnight), var(--sage-deep));
             color: white;
             padding: 0.75rem 1.75rem;
             border-radius: 50px;
@@ -333,7 +304,7 @@
 
         .node-status {
             font-size: 0.75rem;
-            color: var(--moss-medium);
+            color: var(--moss-text);
             display: flex;
             align-items: center;
             gap: 4px;
@@ -380,7 +351,7 @@
         .section-tag {
             font-size: 0.875rem;
             font-weight: 600;
-            color: var(--gold-accent);
+            color: var(--gold-text);
             text-transform: uppercase;
             letter-spacing: 0.1em;
             margin-bottom: var(--space-sm);
@@ -425,7 +396,7 @@
         .feature-icon {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, var(--sage-deep), var(--moss-medium));
+            background: linear-gradient(135deg, var(--forest-midnight), var(--sage-deep));
             border-radius: 16px;
             display: flex;
             align-items: center;
@@ -462,7 +433,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: var(--space-xl);
         }
 
@@ -565,7 +536,7 @@
             border-top: 1px solid rgba(184, 206, 192, 0.2);
             text-align: center;
             font-size: 0.875rem;
-            opacity: 0.7;
+            opacity: 0.85;
         }
 
         /* Responsive */
@@ -647,6 +618,7 @@
             <a href="{{ route('products.index') }}" class="nav-link">Produits</a>
             <a href="{{ route('producers.index') }}" class="nav-link">Producteurs</a>
             <a href="{{ route('transformers.index') }}" class="nav-link">Transformateurs</a>
+            <a href="{{ route('ai-tools.index') }}" class="nav-link">Outils IA</a>
             @auth
                 <a href="{{ route('dashboard') }}" class="nav-link">{{ auth()->user()->canAccessBackOffice() ? 'Back-office' : 'Mon espace' }}</a>
                 <form method="POST" action="{{ route('logout') }}" style="display: inline;">
@@ -817,6 +789,10 @@
                 <a href="{{ route('register') }}" class="btn-primary">Créer un compte gratuit</a>
                 <a href="{{ route('products.index') }}" class="btn-outline">Voir les produits</a>
             </div>
+            <p class="cta-description" style="margin-top: 1.5rem; margin-bottom: 0;">
+                Vous êtes producteur, transformateur ou distributeur ?
+                <a href="{{ auth()->check() ? route('pro-account.create') : route('register') }}" style="color: inherit; font-weight: 700; text-decoration: underline;">Demander un compte professionnel</a>
+            </p>
         </div>
     </section>
 

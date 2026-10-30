@@ -15,6 +15,15 @@
         <div class="tv-card">
             @include('profile.partials.two-factor-form')
         </div>
+        @if(auth()->user()->role === 'consumer')
+            <div class="tv-card flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-lg font-medium text-slate-900">Compte professionnel</h2>
+                    <p class="mt-1 text-sm text-slate-600">Vous êtes producteur, transformateur ou distributeur ? Demandez l’accès au back-office.</p>
+                </div>
+                <a href="{{ route('pro-account.create') }}" class="tv-btn-primary shrink-0">Demander un compte professionnel</a>
+            </div>
+        @endif
         <div class="tv-card">
             @include('profile.partials.delete-user-form')
         </div>

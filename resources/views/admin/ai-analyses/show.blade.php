@@ -28,7 +28,7 @@
             <div><dt>Produit</dt><dd>@if($item->product)<a class="tv-link" href="{{ route('admin.products.show', $item->product) }}">{{ $item->product->name }}</a>@else — @endif</dd></div>
             <div><dt>Déclaration</dt><dd>@if($item->environmentalClaim)<a class="tv-link" href="{{ route('admin.environmental-claims.show', $item->environmentalClaim) }}">{{ $item->environmentalClaim->title }}</a>@else Toutes les déclarations du produit @endif</dd></div>
             <div><dt>Risque de greenwashing</dt><dd>
-                <span class="font-semibold {{ $item->greenwashing_score >= 65 ? 'text-red-700' : ($item->greenwashing_score >= 35 ? 'text-amber-700' : 'text-emerald-700') }}">{{ $item->greenwashing_score }}/100</span>
+                <span class="font-semibold {{ $item->greenwashing_score >= 65 ? 'text-red-700' : ($item->greenwashing_score >= 35 ? 'text-amber-800' : 'text-emerald-700') }}">{{ $item->greenwashing_score }}/100</span>
             </dd></div>
             <div><dt>Crédibilité</dt><dd>{{ $item->credibility_rating ?? '—' }}</dd></div>
             <div><dt>Moteur</dt><dd>{{ $item->model_used }} {{ $item->is_demo ? '(heuristique locale, sans IA)' : '' }}</dd></div>
@@ -46,6 +46,6 @@
                 <li>Aucun signal d’alerte relevé.</li>
             @endforelse
         </ul>
-        <p class="mt-4 text-xs text-slate-500">Aide à la décision : ce score ne constitue pas une preuve de fraude.</p>
+        <p class="mt-4 text-xs text-slate-600">Aide à la décision : ce score ne constitue pas une preuve de fraude.</p>
     </div>
 @endsection

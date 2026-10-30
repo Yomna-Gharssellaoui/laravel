@@ -6,6 +6,7 @@ use App\Models\AIAnalysis;
 use App\Models\EnvironmentalClaim;
 use App\Models\Product;
 use App\Services\Ai\AiProvider;
+use App\Services\Ml\MlService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -14,7 +15,8 @@ use Throwable;
 /**
  * Scores environmental claims for greenwashing risk.
  *
- * With an AI key (Claude or Gemini, see AiProvider), the claim and its evidence
+ * First choice: the local ML model of module M5 (ml/modules/m5_greenwashing.py), combined with
+ * the evidence stored in the database. Otherwise, with an AI key (Claude or Gemini, see AiProvider), the claim and its evidence
  * (certifications, footprint, compliance checks) are sent to the model, which returns a
  * structured JSON verdict. Without a key, or if the call fails, a transparent rule-based
  * heuristic is used and the analysis is flagged as is_demo.
@@ -22,6 +24,8 @@ use Throwable;
 class GreenwashingAnalyzer
 {
     public const HEURISTIC_MODEL = 'heuristique-locale-v1';
+
+    public const ML_MODEL = 'ml-m5-greenwashing (scikit-learn)';
 
     /** Vague marketing terms that are not meaningful without proof. */
     private const VAGUE_TERMS = [
@@ -92,7 +96,10 @@ PROMPT;
         $result = null;
         $model = self::HEURISTIC_MODEL;
 
-        if ($llm = $this->ai->current()) {
+        // 1. Local ML model (module M5), 2. optional LLM provider, 3. rule-based heuristic
+        if ($ml = $this->machineLearning($product, $claims)) {
+            [$result, $model] = [$ml, self::ML_MODEL];
+        } elseif ($llm = $this->ai->current()) {
             try {
                 $result = $this->validResult($llm->json(self::SYSTEM_PROMPT, $this->buildContext($product, $claims), self::RESPONSE_SCHEMA));
                 $model = $llm->name();
@@ -116,7 +123,43 @@ PROMPT;
         ]);
     }
 
-    public function __construct(private AiProvider $ai) {}
+    public function __construct(private AiProvider $ai, private MlService $ml) {}
+
+    /**
+     * ML score on the claim text (TF-IDF + logistic regression), combined with the evidence
+     * found in the database (certifications, compliance checks, footprint) by the heuristic.
+     */
+    private function machineLearning(Product $product, $claims): ?array
+    {
+        $text = $claims->map(fn ($c) => trim($c->claim_type.'. '.$c->title.'. '.$c->description, '. '))->implode(' ');
+        $prediction = $text !== '' ? $this->ml->greenwashing($text) : null;
+
+        if ($prediction === null) {
+            return null;
+        }
+
+        $evidence = $this->heuristic($product, $claims);
+        $score = (int) round(0.6 * $prediction['probability'] + 0.4 * $evidence['greenwashing_score']);
+
+        $flags = array_map(fn ($term) => "Expression à risque repérée par le modèle : « {$term} »", $prediction['risky_terms']);
+        $flags = array_merge($flags, array_values(array_filter(
+            $evidence['red_flags'],
+            fn ($flag) => ! str_starts_with($flag, 'Termes vagues')
+        )));
+
+        $summary = "Modèle ML (TF-IDF + régression logistique) : {$prediction['probability']} % de probabilité de greenwashing d’après le texte";
+        $summary .= $prediction['reassuring_terms'] !== []
+            ? ' (éléments vérifiables : '.implode(', ', $prediction['reassuring_terms']).'). '
+            : '. ';
+        $summary .= 'Score final combiné avec les preuves en base (certifications, vérifications, empreinte) : '.$score.'/100.';
+
+        return [
+            'greenwashing_score' => $score,
+            'credibility_rating' => $score < 35 ? 'élevée' : ($score < 65 ? 'moyenne' : 'faible'),
+            'summary' => $summary,
+            'red_flags' => $flags,
+        ];
+    }
 
     public function aiEnabled(): bool
     {

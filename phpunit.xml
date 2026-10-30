@@ -20,6 +20,7 @@
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="AI_PROVIDER" value="auto"/>
+        <env name="ML_SERVICE_URL" value=""/>
         <env name="GEMINI_API_KEY" value=""/>
         <env name="ANTHROPIC_API_KEY" value=""/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>

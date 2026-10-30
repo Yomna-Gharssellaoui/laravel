@@ -39,7 +39,7 @@
     </div>
     <div>
         <x-form.field label="Distance totale (km)" name="total_distance_km" type="number" step="0.01" min="0" :value="old('total_distance_km', $item?->total_distance_km ?? '')" />
-        <p class="mt-1 text-xs text-slate-500">Laissez vide pour la calculer à partir des coordonnées GPS des étapes.</p>
+        <p class="mt-1 text-xs text-slate-600">Laissez vide pour la calculer à partir des coordonnées GPS des étapes.</p>
     </div>
 </div>
 
@@ -48,7 +48,7 @@
         <h3 class="tv-section-title mb-0">Étapes du parcours</h3>
         <button type="button" class="tv-btn-secondary" data-add-step>+ Ajouter une étape</button>
     </div>
-    <p class="mt-1 text-xs text-slate-500">La dernière étape (par date) devient l’étape et la position actuelles.</p>
+    <p class="mt-1 text-xs text-slate-600">La dernière étape (par date) devient l’étape et la position actuelles.</p>
     <x-input-error :messages="collect($errors->get('steps.*'))->flatten()->unique()->all()" class="mt-1" />
 
     <datalist id="trace-stages">

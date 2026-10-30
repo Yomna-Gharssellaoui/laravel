@@ -8,7 +8,7 @@
                 <option value="{{ $claim->id }}" @selected(old('environmental_claim_id', $item?->environmental_claim_id ?? $selectedClaim) == $claim->id)>{{ $claim->title }} — {{ $claim->product?->name ?? 'sans produit' }}</option>
             @endforeach
         </select>
-        <p class="mt-1 text-xs text-slate-500">Le produit est repris automatiquement depuis la déclaration.</p>
+        <p class="mt-1 text-xs text-slate-600">Le produit est repris automatiquement depuis la déclaration.</p>
         <x-input-error :messages="$errors->get('environmental_claim_id')" class="mt-1" />
     </div>
     <div>
@@ -26,7 +26,7 @@
                 <option value="{{ $status }}" @selected(old('status', $item?->status ?? 'pending') === $status)>{{ $status }}</option>
             @endforeach
         </select>
-        <p class="mt-1 text-xs text-slate-500">« failed » crée une alerte et rejette la déclaration ; « passed » la valide.</p>
+        <p class="mt-1 text-xs text-slate-600">« failed » crée une alerte et rejette la déclaration ; « passed » la valide.</p>
         <x-input-error :messages="$errors->get('status')" class="mt-1" />
     </div>
     <x-form.field label="Date de vérification" name="checked_at" type="date" :value="old('checked_at', $item?->checked_at?->format('Y-m-d'))" />

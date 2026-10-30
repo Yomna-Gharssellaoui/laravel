@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Review;
+use App\Services\Ml\MlService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
-    public function store(Request $request, Product $product): RedirectResponse
+    public function store(Request $request, Product $product, MlService $ml): RedirectResponse
     {
         abort_unless($product->status === 'published', 404);
 
@@ -19,12 +20,16 @@ class ReviewController extends Controller
             'comment' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        // Module M4: a review the model is almost sure is spam is rejected straight away
+        $analysis = $ml->reviewAnalysis(trim(($data['title'] ?? '').'. '.($data['comment'] ?? ''), '. '));
+        $status = ($analysis['spam_probability'] ?? 0) >= 90 ? 'rejected' : 'pending';
+
         Review::updateOrCreate(
             [
                 'product_id' => $product->id,
                 'user_id' => $request->user()->id,
             ],
-            $data + ['status' => 'pending', 'verified_purchase' => false]
+            $data + ['status' => $status, 'verified_purchase' => false]
         );
 
         return back()->with('success', 'Votre avis a été soumis et sera modéré avant publication.');

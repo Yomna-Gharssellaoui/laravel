@@ -21,7 +21,7 @@
                         <div class="flex items-start justify-between gap-3">
                             <div>
                                 <h2 class="font-display text-xl font-semibold text-brand-900">{{ $product->name }}</h2>
-                                <p class="text-sm text-slate-500">{{ $product->producer?->company_name ?? 'Producteur inconnu' }} · {{ $product->origin ?? '—' }}</p>
+                                <p class="text-sm text-slate-600">{{ $product->producer?->company_name ?? 'Producteur inconnu' }} · {{ $product->origin ?? '—' }}</p>
                             </div>
                             <span class="shrink-0 rounded-full px-3 py-1 text-sm font-bold {{ $rating->personalized_score >= 70 ? 'bg-brand-600 text-white' : ($rating->personalized_score >= 40 ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700') }}">{{ $rating->personalized_score }}/100</span>
                         </div>

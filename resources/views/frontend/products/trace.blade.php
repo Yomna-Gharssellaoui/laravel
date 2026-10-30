@@ -10,7 +10,7 @@
     <section class="mx-auto grid max-w-7xl gap-6 px-4 py-10 sm:px-6 lg:grid-cols-3 lg:px-8">
         <div class="tv-card lg:col-span-2">
             <h2 class="tv-section-title">Parcours du produit</h2>
-            <x-trace-timeline :traces="$product->supplyChainTraces" />
+            <x-trace-timeline :traces="$product->supplyChainTraces" :show-risk="true" />
         </div>
         <div class="tv-card">
             <h2 class="tv-section-title">Certifications</h2>

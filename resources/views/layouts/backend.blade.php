@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Back-office') — Trace Verte</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -17,12 +18,12 @@
                 <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-700 text-white font-display">TV</span>
                 <div>
                     <p class="font-display text-lg font-semibold text-brand-800">Trace Verte</p>
-                    <p class="text-xs text-slate-500">Back-office</p>
+                    <p class="text-xs text-slate-600">Back-office</p>
                 </div>
             </div>
             <nav class="space-y-1 p-4 text-sm overflow-y-auto max-h-[calc(100vh-4rem)]">
                 <a href="{{ route('admin.dashboard') }}" class="tv-nav-link {{ request()->routeIs('admin.dashboard') ? 'tv-nav-link-active' : '' }}">Tableau de bord</a>
-                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Produits</p>
+                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Produits</p>
                 <a href="{{ route('admin.products.index') }}" class="tv-nav-link {{ request()->routeIs('admin.products.*') ? 'tv-nav-link-active' : '' }}">{{ auth()->user()->isAdmin() ? 'Produits' : 'Mes produits' }}</a>
                 <a href="{{ route('admin.supply-chain-traces.index') }}" class="tv-nav-link {{ request()->routeIs('admin.supply-chain-traces.*') ? 'tv-nav-link-active' : '' }}">Traces logistiques</a>
                 <a href="{{ route('admin.certificates.index') }}" class="tv-nav-link {{ request()->routeIs('admin.certificates.*') ? 'tv-nav-link-active' : '' }}">Certifications</a>
@@ -30,19 +31,27 @@
                 <a href="{{ route('admin.environmental-footprints.index') }}" class="tv-nav-link {{ request()->routeIs('admin.environmental-footprints.*') ? 'tv-nav-link-active' : '' }}">Empreintes</a>
                 <a href="{{ route('admin.environmental-claims.index') }}" class="tv-nav-link {{ request()->routeIs('admin.environmental-claims.*') ? 'tv-nav-link-active' : '' }}">Déclarations</a>
                 <a href="{{ route('admin.compliance-checks.index') }}" class="tv-nav-link {{ request()->routeIs('admin.compliance-checks.*') ? 'tv-nav-link-active' : '' }}">Conformité</a>
-                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Acteurs</p>
+                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Acteurs</p>
                 <a href="{{ route('admin.producers.index') }}" class="tv-nav-link {{ request()->routeIs('admin.producers.*') ? 'tv-nav-link-active' : '' }}">Producteurs</a>
                 <a href="{{ route('admin.transformers.index') }}" class="tv-nav-link {{ request()->routeIs('admin.transformers.*') ? 'tv-nav-link-active' : '' }}">Transformateurs</a>
                 <a href="{{ route('admin.distributors.index') }}" class="tv-nav-link {{ request()->routeIs('admin.distributors.*') ? 'tv-nav-link-active' : '' }}">Distributeurs</a>
-                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Qualité</p>
+                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Qualité</p>
                 <a href="{{ route('admin.alerts.index') }}" class="tv-nav-link {{ request()->routeIs('admin.alerts.*') ? 'tv-nav-link-active' : '' }}">Alertes</a>
                 <a href="{{ route('admin.ai-analyses.index') }}" class="tv-nav-link {{ request()->routeIs('admin.ai-analyses.*') ? 'tv-nav-link-active' : '' }}">Analyses IA</a>
+                <a href="{{ route('admin.ml-models.index') }}" class="tv-nav-link {{ request()->routeIs('admin.ml-models.*') ? 'tv-nav-link-active' : '' }}">Modèles ML</a>
                 <a href="{{ route('admin.reviews.index') }}" class="tv-nav-link {{ request()->routeIs('admin.reviews.*') ? 'tv-nav-link-active' : '' }}">Modération des avis</a>
-                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Consommateurs</p>
+                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Consommateurs</p>
                 <a href="{{ route('admin.consumers.index') }}" class="tv-nav-link {{ request()->routeIs('admin.consumers.*') ? 'tv-nav-link-active' : '' }}">Profils</a>
                 <a href="{{ route('admin.personal-ratings.index') }}" class="tv-nav-link {{ request()->routeIs('admin.personal-ratings.*') ? 'tv-nav-link-active' : '' }}">Recommandations</a>
-                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Administration</p>
+                <p class="px-3 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Administration</p>
                 <a href="{{ route('admin.users.index') }}" class="tv-nav-link {{ request()->routeIs('admin.users.*') ? 'tv-nav-link-active' : '' }}">Utilisateurs</a>
+                @php $pendingProRequests = \App\Models\ProAccountRequest::where('status', 'pending')->count(); @endphp
+                <a href="{{ route('admin.pro-requests.index') }}" class="tv-nav-link {{ request()->routeIs('admin.pro-requests.*') ? 'tv-nav-link-active' : '' }}">
+                    Demandes de compte pro
+                    @if($pendingProRequests > 0)
+                        <span class="ml-auto rounded-full bg-amber-300 px-2 py-0.5 text-xs font-bold text-amber-950">{{ $pendingProRequests }}</span>
+                    @endif
+                </a>
                 @endif
                 <div class="pt-4 mt-4 border-t border-slate-100">
                     <a href="{{ route('home') }}" class="tv-nav-link">← Front office</a>

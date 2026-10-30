@@ -9,7 +9,8 @@ use Illuminate\View\Component;
 
 class TraceTimeline extends Component
 {
-    public function __construct(public Collection $traces) {}
+    /** @param bool $showRisk show the delay risk predicted by the ML model (M3) */
+    public function __construct(public Collection $traces, public bool $showRisk = false) {}
 
     public function render(): View|Closure|string
     {

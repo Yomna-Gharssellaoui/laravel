@@ -69,6 +69,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Review::class);
     }
 
+    public function proAccountRequests(): HasMany
+    {
+        return $this->hasMany(ProAccountRequest::class)->latest('id');
+    }
+
+    public function pendingProAccountRequest(): ?ProAccountRequest
+    {
+        return $this->proAccountRequests()->where('status', 'pending')->first();
+    }
+
     public function hasRole(string|array $role): bool
     {
         $roles = (array) $role;
