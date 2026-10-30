@@ -41,6 +41,7 @@ RUN composer install \
 # ==========================================
 FROM php:8.2-fpm-bookworm AS production
 
+
 # System dependencies and PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpng-dev \
@@ -49,6 +50,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libzip-dev \
     libicu-dev \
     libxml2-dev \
+    libonig-dev \
     unzip \
     && docker-php-ext-configure gd \
         --with-freetype \
@@ -64,6 +66,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pcntl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
 
 WORKDIR /var/www/html
 
