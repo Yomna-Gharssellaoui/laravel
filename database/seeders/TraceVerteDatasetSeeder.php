@@ -53,6 +53,7 @@ class TraceVerteDatasetSeeder extends Seeder
         $this->traces($products, $distributors);
         $claims = $this->claimsAndChecks($products);
         $this->consumersAndReviews($users, $products);
+        $this->proAccountRequests($users);
 
         // Greenwashing analyses with the local heuristic (no API call while seeding)
         $keys = ['services.anthropic.api_key' => config('services.anthropic.api_key'), 'services.gemini.api_key' => config('services.gemini.api_key')];
@@ -61,6 +62,36 @@ class TraceVerteDatasetSeeder extends Seeder
             app(GreenwashingAnalyzer::class)->analyzeClaim($claim->fresh());
         }
         config($keys);
+    }
+
+    /**
+     * A pending professional account request to review, and an older rejected one.
+     */
+    private function proAccountRequests(array $users): void
+    {
+        $users['candidate']->proAccountRequests()->delete();
+
+        $rejected = $users['candidate']->proAccountRequests()->create([
+            'requested_role' => 'producer',
+            'company_name' => 'Ferme Ben Amor',
+            'location' => 'Kairouan',
+            'activity_type' => 'conventionnelle',
+            'motivation' => 'Je souhaite vendre mes produits.',
+        ]);
+        $rejected->forceFill([
+            'status' => 'rejected', 'admin_note' => 'Présentation trop courte : décrivez vos cultures et vos volumes.',
+            'reviewed_by' => $users['admin']->id, 'reviewed_at' => now()->subDays(12), 'created_at' => now()->subDays(14),
+        ])->save();
+
+        $users['candidate']->proAccountRequests()->create([
+            'requested_role' => 'producer',
+            'company_name' => 'Ferme Ben Amor',
+            'location' => 'Kairouan, Tunisie',
+            'activity_type' => 'raisonnée',
+            'phone' => '+216 98 123 456',
+            'registration_number' => '1234567/A/M/000',
+            'motivation' => 'Exploitation familiale de 12 hectares : abricots, piments et olives. Environ 40 tonnes par an, vendues aux grossistes de Sousse. Nous souhaitons publier nos produits et leur traçabilité.',
+        ]);
     }
 
     /**
@@ -77,6 +108,7 @@ class TraceVerteDatasetSeeder extends Seeder
             'consumer' => ['Yasmine Consommatrice', 'consumer@traceverte.test', 'consumer'],
             'sara' => ['Sara Mansour', 'sara@traceverte.test', 'consumer'],
             'karim' => ['Karim Bouazizi', 'karim@traceverte.test', 'consumer'],
+            'candidate' => ['Hedi Ben Amor', 'candidat@traceverte.test', 'consumer'],
             'unverified' => ['Nouveau Compte', 'nouveau@traceverte.test', 'consumer'],
             'blocked' => ['Compte Suspendu', 'bloque@traceverte.test', 'consumer'],
         ];

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\AiToolsController;
 use App\Http\Controllers\ConsumerController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ProAccountRequestController;
 use App\Http\Controllers\ProducerController;
 use App\Http\Controllers\ProductAssistantController;
 use App\Http\Controllers\ProductController;
@@ -37,6 +38,11 @@ Route::middleware(['auth', 'verified', 'active'])->group(function () {
     Route::get('/mon-profil/modifier', [ConsumerController::class, 'edit'])->name('consumer.edit');
     Route::patch('/mon-profil', [ConsumerController::class, 'update'])->name('consumer.update');
     Route::get('/mes-recommandations', [ConsumerController::class, 'recommendations'])->name('consumer.recommendations');
+
+    // Ask for a professional account (producer, transformer, distributor)
+    Route::get('/compte-pro', [ProAccountRequestController::class, 'create'])->name('pro-account.create');
+    Route::post('/compte-pro', [ProAccountRequestController::class, 'store'])->middleware('throttle:5,1')->name('pro-account.store');
+    Route::delete('/compte-pro/{proAccountRequest}', [ProAccountRequestController::class, 'destroy'])->name('pro-account.destroy');
 
     Route::post('/produits/{product}/avis', [ReviewController::class, 'store'])->name('reviews.store');
     Route::post('/produits/{product}/assistant', ProductAssistantController::class)
@@ -75,6 +81,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'active'
     Route::middleware('role:admin')->group(function () {
         Route::resource('users', Admin\UserController::class);
         Route::get('ml-models', [Admin\MlModelsController::class, 'index'])->name('ml-models.index');
+        Route::get('pro-requests', [Admin\ProAccountRequestController::class, 'index'])->name('pro-requests.index');
+        Route::get('pro-requests/{proRequest}', [Admin\ProAccountRequestController::class, 'show'])->name('pro-requests.show');
+        Route::patch('pro-requests/{proRequest}/approve', [Admin\ProAccountRequestController::class, 'approve'])->name('pro-requests.approve');
+        Route::patch('pro-requests/{proRequest}/reject', [Admin\ProAccountRequestController::class, 'reject'])->name('pro-requests.reject');
+        Route::get('pro-requests/{proRequest}/document', [Admin\ProAccountRequestController::class, 'document'])->name('pro-requests.document');
         Route::patch('users/{user}/block', [Admin\UserController::class, 'toggleBlock'])->name('users.block');
         Route::post('users/{user}/verification', [Admin\UserController::class, 'resendVerification'])->name('users.verification');
 
