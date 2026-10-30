@@ -66,11 +66,6 @@ python train_all.py
 uvicorn service:app --port 8001
 ```
 
-## Avec Docker
-
-`docker compose up -d --build` construit aussi le service `ml` (modèles entraînés pendant le build)
-et configure `ML_SERVICE_URL=http://ml:8001` pour l'application.
-
 ## Commandes utiles
 
 | Commande | Rôle |

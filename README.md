@@ -28,17 +28,7 @@ npm install && npm run build
 composer dev   # serveur + worker de file d'attente + logs + Vite
 ```
 
-### Avec Docker (app + file d'attente + planificateur + MySQL + Mailpit)
-
-```bash
-cp .env.example .env        # puis renseigner APP_KEY (php artisan key:generate --show)
-docker compose up -d --build
-```
-
-- Application : http://localhost:8000
-- Emails envoyés (vérification, mot de passe oublié, alertes) : http://localhost:8025
-
-### Recevoir les emails en local sans Docker
+### Recevoir les emails en local
 
 Par défaut (`MAIL_MAILER=log`) les emails sont écrits dans `storage/logs/laravel.log`.
 Pour les recevoir réellement, utilisez un compte gratuit [Mailtrap](https://mailtrap.io) (Email Testing)
@@ -185,14 +175,9 @@ et l'assistant répond uniquement à partir de ces données. Limité à 10 quest
 - Files d'attente (analyse IA des déclarations), tâches planifiées, notifications email
 - Recommandations personnalisées calculées, téléversement de fichiers, tableau de bord avec graphiques
 
-## DevOps
+## Git
 
-- `Dockerfile` multi-étapes (dépendances Composer, build Vite, PHP 8.3 + Apache) et `docker-compose.yml`
-- CI GitHub Actions (`.github/workflows/ci.yml`) : tests sur PHP 8.2 et 8.3, Pint, audit de sécurité,
-  build front, entraînement + tests des modèles ML (pytest), images Docker (app et `ml`) publiées sur GHCR
-  à chaque push sur `main`
-- `Jenkinsfile` et `sonar-project.properties` pour une chaîne Jenkins + SonarQube
-- Workflow Git : voir [CONTRIBUTING.md](CONTRIBUTING.md)
+Workflow Git (branches, messages de commit, pull requests) : voir [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Tests
 
@@ -201,5 +186,4 @@ php artisan test
 cd ml && python -m pytest -q
 ```
 
-Les tests utilisent une base SQLite en mémoire (rapide, sans toucher à vos données). La CI rejoue en plus toute la
-suite sur un vrai MySQL 8.4.
+Les tests utilisent une base SQLite en mémoire (rapide, sans toucher à vos données).

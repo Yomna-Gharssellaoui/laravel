@@ -15,13 +15,13 @@ Messages courts au présent, préfixés par le type :
 feat(products): ajout du QR code de traçabilité
 fix(auth): bouton de déconnexion manquant
 test(alerts): alerte créée après une vérification échouée
-docs: installation Docker
+docs: installation sous Windows
 ```
 
 ## Pull requests
 
 1. Poussez votre branche et ouvrez une PR vers `develop`.
-2. La CI GitHub Actions doit être verte (tests, Pint, build front, image Docker).
+2. Les tests (`php artisan test`) et le style (`vendor/bin/pint --test`) doivent passer.
 3. Au moins une relecture par un autre membre du groupe avant la fusion.
 4. Fusion de `develop` vers `main` à chaque version de démonstration.
 
