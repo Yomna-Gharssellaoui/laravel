@@ -12,7 +12,7 @@
                 <option value="{{ $st }}" @selected(old('status', $item?->status ?? 'draft') === $st)>{{ $st }}</option>
             @endforeach
         </select>
-        <p class="mt-1 text-xs text-slate-500">La publication exige une empreinte environnementale et au moins une certification.</p>
+        <p class="mt-1 text-xs text-slate-600">La publication exige une empreinte environnementale et au moins une certification.</p>
         <x-input-error :messages="$errors->get('status')" class="mt-1" />
     </div>
     @if($canChooseProducer)

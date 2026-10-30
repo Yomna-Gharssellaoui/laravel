@@ -28,7 +28,7 @@
                     @forelse($items as $item)
                         <tr>
                             <td>{{ $item->company_name ?? '—' }}</td><td>{{ $item->location ?? '—' }}</td><td>{{ $item->farming_method ?? '—' }}</td><td>{{ $item->products_count ?? '—' }}</td>
-                            <td>@php($profile = $ml->producerProfile($item)) @if($profile)<x-ml-badge :title="$profile['description']">{{ $profile['label'] }}</x-ml-badge>@else<span class="text-xs text-slate-400">—</span>@endif</td>
+                            <td>@php($profile = $ml->producerProfile($item)) @if($profile)<x-ml-badge :title="$profile['description']">{{ $profile['label'] }}</x-ml-badge>@else<span class="text-xs text-slate-500">—</span>@endif</td>
                             <td class="text-right whitespace-nowrap">
                                 <a href="{{ route('admin.producers.show', $item) }}" class="tv-link">Voir</a>
                                 <a href="{{ route('admin.producers.edit', $item) }}" class="tv-link ml-2">Modifier</a>

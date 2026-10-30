@@ -17,7 +17,7 @@
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         @foreach($stats as $key => $value)
             <div class="tv-card py-4">
-                <p class="text-xs uppercase tracking-wide text-slate-500">{{ $labels[$key] ?? $key }}</p>
+                <p class="text-xs uppercase tracking-wide text-slate-600">{{ $labels[$key] ?? $key }}</p>
                 <p class="mt-1 text-2xl font-semibold text-brand-800">{{ $value }}</p>
             </div>
         @endforeach
@@ -53,7 +53,7 @@
                 @forelse($recentProducts as $p)
                     <li class="flex justify-between gap-3 py-2">
                         <a href="{{ route('admin.products.show', $p) }}" class="tv-link">{{ $p->name }}</a>
-                        <span class="text-slate-500">{{ $p->producer?->company_name ?? '—' }} · <x-status-badge :status="$p->status" /></span>
+                        <span class="text-slate-600">{{ $p->producer?->company_name ?? '—' }} · <x-status-badge :status="$p->status" /></span>
                     </li>
                 @empty
                     <li class="py-2 text-slate-600">Aucun produit.</li>
@@ -70,7 +70,7 @@
             <ul class="divide-y divide-slate-100 text-sm">
                 @forelse($recentAlerts as $a)
                     <li class="flex justify-between gap-3 py-2">
-                        <span>{{ $a->title }} <span class="text-slate-500">— {{ $a->product?->name }}</span></span>
+                        <span>{{ $a->title }} <span class="text-slate-600">— {{ $a->product?->name }}</span></span>
                         <x-status-badge :status="$a->severity" />
                     </li>
                 @empty

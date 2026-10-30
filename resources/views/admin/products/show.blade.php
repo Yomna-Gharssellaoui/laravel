@@ -100,7 +100,7 @@
                     <div class="rounded-xl bg-violet-50 p-3">
                         <p class="text-xs uppercase tracking-wide text-violet-700">{{ $label }}</p>
                         <p class="mt-1 text-xl font-semibold text-slate-800">{{ $estimate[$key]['value'] }} <span class="text-xs font-normal">{{ $unit }}</span></p>
-                        <p class="text-xs text-slate-500">entre {{ $estimate[$key]['low'] }} et {{ $estimate[$key]['high'] }}</p>
+                        <p class="text-xs text-slate-600">entre {{ $estimate[$key]['low'] }} et {{ $estimate[$key]['high'] }}</p>
                         @if($measured && $measured->{$key} !== null)
                             @php($gap = $estimate[$key]['value'] > 0 ? round(((float) $measured->{$key} / $estimate[$key]['value'] - 1) * 100) : 0)
                             <p class="mt-1 text-xs {{ abs($gap) > 50 ? 'text-red-700 font-semibold' : 'text-slate-600' }}">Mesuré : {{ $measured->{$key} }} ({{ $gap > 0 ? '+' : '' }}{{ $gap }} %)</p>
@@ -138,7 +138,7 @@
                     <div class="rounded-lg border border-slate-200 p-3 text-sm">
                         <div class="flex justify-between gap-2">
                             <span class="font-medium">Greenwashing : {{ $analysis->greenwashing_score ?? '—' }}/100 · crédibilité {{ $analysis->credibility_rating ?? '—' }}</span>
-                            <span class="text-slate-500">{{ $analysis->model_used }} · {{ $analysis->created_at?->format('d/m/Y H:i') }}</span>
+                            <span class="text-slate-600">{{ $analysis->model_used }} · {{ $analysis->created_at?->format('d/m/Y H:i') }}</span>
                         </div>
                         <p class="mt-1 text-slate-600">{{ $analysis->ai_summary }}</p>
                     </div>

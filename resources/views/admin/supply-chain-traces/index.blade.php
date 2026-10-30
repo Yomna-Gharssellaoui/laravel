@@ -34,7 +34,7 @@
                                 @php($risk = $item->status === 'in_transit' ? $ml->delayRisk($item) : null)
                                 @if($item->status === 'delayed') <x-ml-badge level="bad">Retard constaté</x-ml-badge>
                                 @elseif($risk) <x-ml-badge :level="['faible' => 'good', 'moyen' => 'warn', 'élevé' => 'bad'][$risk['level']]" title="Gradient Boosting (M3)">{{ $risk['risk'] }} % · {{ $risk['level'] }}</x-ml-badge>
-                                @else <span class="text-xs text-slate-400">—</span>
+                                @else <span class="text-xs text-slate-500">—</span>
                                 @endif
                             </td>
                             <td class="text-right whitespace-nowrap">

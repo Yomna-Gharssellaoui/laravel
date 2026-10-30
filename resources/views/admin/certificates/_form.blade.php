@@ -29,7 +29,7 @@
             <input type="hidden" name="status" value="pending">
             <p class="tv-input mt-1 bg-slate-50">pending — validé par un administrateur</p>
         @endif
-        <p class="mt-1 text-xs text-slate-500">Les certifications expirées passent automatiquement en « expired » (tâche quotidienne).</p>
+        <p class="mt-1 text-xs text-slate-600">Les certifications expirées passent automatiquement en « expired » (tâche quotidienne).</p>
     </div>
     <div>
         <x-input-label for="document" value="Certificat (PDF, JPG, PNG — 5 Mo max)" />

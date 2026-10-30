@@ -22,7 +22,7 @@
                 <x-form.field label="Émissions CO₂ (kg CO₂e / kg)" name="co2_emissions" type="number" step="0.01" :value="old('co2_emissions', $item?->co2_emissions ?? request('co2_emissions', ''))" />
                 <x-form.field label="Consommation d’eau (L / kg)" name="water_usage" type="number" step="0.01" :value="old('water_usage', $item?->water_usage ?? request('water_usage', ''))" />
                 <x-form.field label="Occupation des sols (m² / kg)" name="land_usage" type="number" step="0.01" :value="old('land_usage', $item?->land_usage ?? request('land_usage', ''))" />
-                <p class="md:col-span-2 text-sm text-slate-500">Le score environnemental (0-100) est calculé automatiquement : CO₂ 50 % (0 au-delà de 20 kg), eau 30 % (0 au-delà de 500 L), sols 20 % (0 au-delà de 10 m²).</p>
+                <p class="md:col-span-2 text-sm text-slate-600">Le score environnemental (0-100) est calculé automatiquement : CO₂ 50 % (0 au-delà de 20 kg), eau 30 % (0 au-delà de 500 L), sols 20 % (0 au-delà de 10 m²).</p>
             </div>
             <div class="flex gap-3">
                 <button type="submit" class="tv-btn-primary">Enregistrer</button>

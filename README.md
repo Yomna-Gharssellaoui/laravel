@@ -68,6 +68,8 @@ Mot de passe : `password`
 | producer2@traceverte.test | producer | un autre producteur (dattes) |
 | consumer@traceverte.test | consumer | site public, avis, recommandations |
 | sara@traceverte.test | consumer | allergique au gluten |
+| karim@traceverte.test | consumer | auteur de l'avis spam |
+| candidat@traceverte.test | consumer | demande de compte producteur en attente |
 | nouveau@traceverte.test | consumer | email non vérifié |
 | bloque@traceverte.test | consumer | compte suspendu |
 
@@ -108,6 +110,7 @@ Mot de passe : `password`
 | 2FA | TOTP via Laravel **Fortify** : QR code, confirmation par un premier code, 8 codes de récupération, activation et désactivation par l'utilisateur, étape de code à la connexion |
 | Profil | Nom, email, mot de passe, **photo de profil**, suppression du compte |
 | Administration | CRUD des comptes, changement de rôle, suspension, renvoi de l'email de vérification |
+| Demande de compte professionnel | Bouton « Demander un compte professionnel » (Mon espace, Mon compte, accueil) : formulaire avec justificatif privé, email aux admins, validation ou refus motivé par un admin, rôle et fiche acteur créés à l'acceptation, email de décision |
 
 Messages de validation et emails en français (`lang/fr`).
 

@@ -8,7 +8,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <p class="text-sm text-slate-600">Un modèle scikit-learn par module, entraîné et exécuté localement par le service Python <code>ml/</code>, sans API externe.</p>
-                <p class="mt-1 text-xs text-slate-500">Données d’entraînement synthétiques et reproductibles (graine 42), décrites dans chaque fichier <code>ml/modules/*.py</code>. Réentraîner : <code>cd ml</code> puis <code>python train_all.py</code>.</p>
+                <p class="mt-1 text-xs text-slate-600">Données d’entraînement synthétiques et reproductibles (graine 42), décrites dans chaque fichier <code>ml/modules/*.py</code>. Réentraîner : <code>cd ml</code> puis <code>python train_all.py</code>.</p>
             </div>
             @if($health)
                 <x-ml-badge level="good">Service ML démarré · {{ collect($health['models'])->filter()->count() }}/{{ count($health['models']) }} modèles chargés</x-ml-badge>
@@ -41,12 +41,12 @@
                     @isset($model['algorithm'])
                         <p class="mt-3 text-sm text-slate-700">{{ $model['description'] }}</p>
                         <dl class="mt-3 grid gap-1 text-sm">
-                            <div class="flex justify-between gap-4"><dt class="text-slate-500">Algorithme</dt><dd class="text-right font-medium">{{ $model['algorithm'] }}</dd></div>
-                            <div class="flex justify-between gap-4"><dt class="text-slate-500">Données d’entraînement</dt><dd class="font-medium">{{ number_format($model['dataset_rows'], 0, ',', ' ') }} lignes</dd></div>
-                            <div class="flex justify-between gap-4"><dt class="text-slate-500">Utilisé dans</dt><dd class="text-right">{{ $usedIn[$model['name']] ?? '—' }}</dd></div>
+                            <div class="flex justify-between gap-4"><dt class="text-slate-600">Algorithme</dt><dd class="text-right font-medium">{{ $model['algorithm'] }}</dd></div>
+                            <div class="flex justify-between gap-4"><dt class="text-slate-600">Données d’entraînement</dt><dd class="font-medium">{{ number_format($model['dataset_rows'], 0, ',', ' ') }} lignes</dd></div>
+                            <div class="flex justify-between gap-4"><dt class="text-slate-600">Utilisé dans</dt><dd class="text-right">{{ $usedIn[$model['name']] ?? '—' }}</dd></div>
                         </dl>
 
-                        <h4 class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Évaluation (jeu de test mis de côté)</h4>
+                        <h4 class="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-600">Évaluation (jeu de test mis de côté)</h4>
                         <table class="mt-2 w-full text-sm">
                             @foreach($model['metrics'] as $key => $value)
                                 <tr class="border-t border-slate-100">

@@ -21,6 +21,7 @@ Mot de passe de **tous** les comptes : `password`
 | consumer@traceverte.test | consommateur | Préférences bio + faible CO₂, a déjà donné 2 avis |
 | sara@traceverte.test | consommatrice | Préférence local, **allergique au gluten** |
 | karim@traceverte.test | consommateur | Préférences faible eau + bio, 1 avis en attente |
+| candidat@traceverte.test | consommateur | Demande de compte producteur en attente (et une ancienne demande refusée) |
 | nouveau@traceverte.test | consommateur | **Email non vérifié** |
 | bloque@traceverte.test | consommateur | **Compte suspendu** |
 
@@ -122,6 +123,18 @@ php artisan traceverte:scan-alerts
 | transformer@ | L’huile (qu’il transforme) | Créer un produit, changer le producteur |
 | distributor@ | Les 4 traces de Distri Nord, en créer une | Voir les traces de Sahel Logistique (dattes, harissa) |
 
+## 4 bis. Demande de compte professionnel
+
+| Compte | Action | Résultat attendu |
+|---|---|---|
+| sara@ | Mon espace → **Demander un compte professionnel** → Transformateur, « Conserverie Mansour », Nabeul, conserverie, présentation, justificatif PDF, case cochée → Envoyer | « Demande en cours d’examen » ; la liste d’activités ne propose que celles d’un transformateur |
+| sara@ | Renvoyer une demande | Refusé : une seule demande en cours |
+| admin@ | Menu **Demandes de compte pro** (compteur 2) → Examiner → Accepter | Sara devient transformateur, la fiche « Conserverie Mansour » est créée, email envoyé |
+| sara@ | Se reconnecter | Arrive sur le back-office |
+| candidat@ | Ouvrir la page | Demande en attente + ancienne demande refusée avec son motif |
+| admin@ | Refuser sans motif | Erreur : le motif est obligatoire |
+| producer@ | Ouvrir `/admin/pro-requests` | 403 |
+
 ## 5. Machine learning (un modèle par module)
 
 Démarrer le service (voir `ml/README.md`), mettre `ML_SERVICE_URL=http://127.0.0.1:8001` dans `.env`, puis :
@@ -168,7 +181,7 @@ php artisan traceverte:ml-check
 php artisan test
 ```
 
-103 tests : contrôle d’accès, règles métier, 2FA, photo de profil, IA, machine learning (service simulé),
+114 tests : contrôle d’accès, règles métier, 2FA, photo de profil, IA, machine learning (service simulé),
 recommandations, QR code, ouverture de toutes les pages et vérification des scénarios de ce guide.
 
 ```bash

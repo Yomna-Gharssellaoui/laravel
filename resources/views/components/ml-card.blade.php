@@ -8,7 +8,7 @@
         </span>
     </div>
     @if($unavailable)
-        <p class="text-sm text-slate-500">Prédiction indisponible : le service ML n’est pas démarré (<code>cd ml</code> puis <code>uvicorn service:app --port 8001</code>).</p>
+        <p class="text-sm text-slate-600">Prédiction indisponible : le service ML n’est pas démarré (<code>cd ml</code> puis <code>uvicorn service:app --port 8001</code>).</p>
     @else
         {{ $slot }}
     @endif

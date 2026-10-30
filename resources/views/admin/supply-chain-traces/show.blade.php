@@ -39,7 +39,7 @@
                     <div class="h-3 flex-1 rounded-full bg-slate-100"><div class="h-3 rounded-full {{ $color }}" style="width: {{ $risk['risk'] }}%"></div></div>
                     <span class="text-sm font-medium">Risque {{ $risk['level'] }}</span>
                 </div>
-                <p class="mt-2 text-xs text-slate-500">Gradient Boosting entraîné sur 4 000 livraisons : distance, nombre d’étapes, étape actuelle, type de distributeur, catégorie (périssable ou non), jours en transit et mois.</p>
+                <p class="mt-2 text-xs text-slate-600">Gradient Boosting entraîné sur 4 000 livraisons : distance, nombre d’étapes, étape actuelle, type de distributeur, catégorie (périssable ou non), jours en transit et mois.</p>
             @endif
         </x-ml-card>
     @endif
@@ -57,7 +57,7 @@
                         <p class="text-sm text-slate-600">
                             {{ $step['location'] ?? 'Lieu non précisé' }}
                             @if(! empty($step['at'])) · {{ \Illuminate\Support\Carbon::parse($step['at'])->format('d/m/Y H:i') }} @endif
-                            @if(isset($step['lat'], $step['lon'])) · <span class="text-slate-400">{{ $step['lat'] }}, {{ $step['lon'] }}</span> @endif
+                            @if(isset($step['lat'], $step['lon'])) · <span class="text-slate-500">{{ $step['lat'] }}, {{ $step['lon'] }}</span> @endif
                         </p>
                     </li>
                 @endforeach

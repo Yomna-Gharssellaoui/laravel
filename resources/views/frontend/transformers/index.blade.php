@@ -13,13 +13,13 @@
                 @foreach($transformers as $transformer)
                     <a href="{{ route('transformers.show', $transformer) }}" class="group block h-full overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
                         <div class="bg-gradient-to-br from-brand-800 to-brand-500 p-5 text-white">
-                            <span class="inline-flex rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]">Transformation</span>
+                            <span class="inline-flex rounded-full bg-black/25 px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-white">Transformation</span>
                             <h2 class="mt-4 font-display text-2xl font-semibold">{{ $transformer->company_name }}</h2>
                         </div>
                         <div class="space-y-3 p-5">
                             <p class="text-sm text-slate-600">{{ $transformer->location ?? 'Localisation non renseignée' }}</p>
                             <div class="flex items-center justify-between text-sm">
-                                <span class="text-slate-500">{{ $transformer->products_count ?? 0 }} produit(s)</span>
+                                <span class="text-slate-600">{{ $transformer->products_count ?? 0 }} produit(s)</span>
                                 <span class="font-medium text-brand-700">Voir le profil</span>
                             </div>
                         </div>

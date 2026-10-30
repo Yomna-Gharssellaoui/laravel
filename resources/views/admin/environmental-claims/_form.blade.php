@@ -41,5 +41,5 @@
         <x-input-label for="description" value="Description" />
         <textarea name="description" id="description" rows="3" class="tv-input mt-1">{{ old('description', $item?->description) }}</textarea>
     </div>
-    <p class="md:col-span-2 text-sm text-slate-500">Le score de confiance est calculé par l’analyse de greenwashing (100 − score de risque).</p>
+    <p class="md:col-span-2 text-sm text-slate-600">Le score de confiance est calculé par l’analyse de greenwashing (100 − score de risque).</p>
 </div>

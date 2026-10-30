@@ -8,7 +8,7 @@
         @foreach(\App\Models\User::ROLES as $role)
             <a href="{{ route('admin.users.index', ['role' => $role]) }}" class="tv-card py-3 text-center hover:ring-2 hover:ring-brand-200">
                 <p class="text-2xl font-semibold text-brand-800">{{ $counts[$role] ?? 0 }}</p>
-                <p class="text-xs uppercase tracking-wide text-slate-500">{{ $role }}</p>
+                <p class="text-xs uppercase tracking-wide text-slate-600">{{ $role }}</p>
             </a>
         @endforeach
     </div>
@@ -51,7 +51,7 @@
                                 @if($item->isBlocked())
                                     <span class="text-red-700 text-sm">Suspendu</span>
                                 @elseif(! $item->hasVerifiedEmail())
-                                    <span class="text-amber-700 text-sm">Non vérifié</span>
+                                    <span class="text-amber-800 text-sm">Non vérifié</span>
                                 @else
                                     <span class="text-emerald-700 text-sm">Actif</span>
                                 @endif

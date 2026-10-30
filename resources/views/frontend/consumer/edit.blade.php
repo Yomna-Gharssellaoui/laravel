@@ -50,7 +50,7 @@
                 <div>
                     <x-input-label for="allergies" value="Allergies" />
                     <input id="allergies" name="allergies" value="{{ old('allergies', implode(', ', $consumer->allergies ?? [])) }}" class="tv-input mt-1 w-full" placeholder="gluten, lactose">
-                    <p class="mt-1 text-xs text-slate-500">Les produits contenant une de vos allergies sont écartés.</p>
+                    <p class="mt-1 text-xs text-slate-600">Les produits contenant une de vos allergies sont écartés.</p>
                 </div>
             </div>
 

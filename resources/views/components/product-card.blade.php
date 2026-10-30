@@ -13,13 +13,13 @@
 
     <div class="p-4">
         <h3 class="font-display text-xl font-semibold text-brand-900 group-hover:text-brand-700">{{ $product->name }}</h3>
-        <p class="mt-2 text-sm text-slate-500">{{ $product->origin ?? 'Origine non renseignée' }}</p>
+        <p class="mt-2 text-sm text-slate-600">{{ $product->origin ?? 'Origine non renseignée' }}</p>
 
         @if($product->producer)
-            <p class="mt-3 text-xs font-medium uppercase tracking-wide text-slate-500">Par {{ $product->producer->company_name }}</p>
+            <p class="mt-3 text-xs font-medium uppercase tracking-wide text-slate-600">Par {{ $product->producer->company_name }}</p>
         @endif
 
-        <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
+        <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-600">
             <span>{{ $product->status ?? 'Publiée' }}</span>
             <span class="font-semibold text-brand-700">Voir le produit</span>
         </div>

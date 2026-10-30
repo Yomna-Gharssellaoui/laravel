@@ -30,7 +30,7 @@
         <ul class="divide-y divide-slate-100 text-sm">
             @forelse($item->personalRatings->take(10) as $rating)
                 <li class="py-2 flex justify-between gap-4">
-                    <span>{{ $rating->product?->name }} <span class="text-slate-500">— {{ $rating->recommendation_reason }}</span></span>
+                    <span>{{ $rating->product?->name }} <span class="text-slate-600">— {{ $rating->recommendation_reason }}</span></span>
                     <span class="font-semibold">{{ $rating->personalized_score }}/100</span>
                 </li>
             @empty

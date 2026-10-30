@@ -92,7 +92,7 @@
                                 @else
                                     <h3 class="text-base font-semibold text-slate-800">{{ $mine ? 'Modifier mon avis' : 'Donner mon avis' }}</h3>
                                     @if($mine)
-                                        <p class="mt-1 text-xs text-slate-500">Statut : {{ $mine->status === 'approved' ? 'publié' : ($mine->status === 'rejected' ? 'refusé par la modération' : 'en attente de modération') }}</p>
+                                        <p class="mt-1 text-xs text-slate-600">Statut : {{ $mine->status === 'approved' ? 'publié' : ($mine->status === 'rejected' ? 'refusé par la modération' : 'en attente de modération') }}</p>
                                     @endif
                                     <form method="POST" action="{{ $mine ? route('reviews.update', $mine) : route('reviews.store', $product) }}" class="mt-3 space-y-3">
                                         @csrf
@@ -182,12 +182,12 @@
                                         @php $gw = $ml->greenwashing($claim); @endphp
                                         @if($gw)
                                             <div class="mt-3 rounded-xl bg-white p-3 text-xs">
-                                                <span class="font-semibold {{ $gw['probability'] >= 65 ? 'text-red-700' : ($gw['probability'] >= 35 ? 'text-amber-700' : 'text-emerald-700') }}">
+                                                <span class="font-semibold {{ $gw['probability'] >= 65 ? 'text-red-700' : ($gw['probability'] >= 35 ? 'text-amber-800' : 'text-emerald-700') }}">
                                                     Analyse du texte (IA) : {{ $gw['probability'] >= 65 ? 'formulation vague' : ($gw['probability'] >= 35 ? 'à vérifier' : 'formulation vérifiable') }}
                                                     · {{ number_format($gw['probability'], 0) }} % de risque de greenwashing
                                                 </span>
                                                 @if($gw['risky_terms'] && $gw['probability'] >= 35)
-                                                    <span class="text-slate-500">— termes en cause : {{ implode(', ', $gw['risky_terms']) }}</span>
+                                                    <span class="text-slate-600">— termes en cause : {{ implode(', ', $gw['risky_terms']) }}</span>
                                                 @endif
                                             </div>
                                         @endif
@@ -203,7 +203,7 @@
                                                     <div class="rounded-xl bg-white p-3">
                                                         <div class="flex items-center justify-between gap-2">
                                                             <span class="text-sm font-medium text-slate-700">{{ ucfirst(str_replace('_', ' ', $check->check_type ?? 'vérification')) }}</span>
-                                                            <span class="text-xs font-medium {{ $check->status === 'passed' ? 'text-emerald-700' : ($check->status === 'failed' ? 'text-red-700' : 'text-amber-700') }}">
+                                                            <span class="text-xs font-medium {{ $check->status === 'passed' ? 'text-emerald-700' : ($check->status === 'failed' ? 'text-red-700' : 'text-amber-800') }}">
                                                                 {{ str_replace('_', ' ', $check->status) }}
                                                             </span>
                                                         </div>
@@ -228,13 +228,13 @@
                                     <div class="rounded-xl border border-slate-200 p-3">
                                         <div class="flex items-center justify-between gap-3">
                                             <span class="text-sm font-medium text-slate-700">{{ ucfirst(str_replace('_', ' ', $check->check_type ?? 'vérification')) }}</span>
-                                            <span class="text-xs font-medium {{ $check->status === 'passed' ? 'text-emerald-700' : ($check->status === 'failed' ? 'text-red-700' : 'text-amber-700') }}">
+                                            <span class="text-xs font-medium {{ $check->status === 'passed' ? 'text-emerald-700' : ($check->status === 'failed' ? 'text-red-700' : 'text-amber-800') }}">
                                                 {{ str_replace('_', ' ', $check->status) }}
                                             </span>
                                         </div>
                                         <p class="mt-2 text-sm text-slate-600">{{ $check->result_summary }}</p>
                                         @if($check->environmentalClaim)
-                                            <p class="mt-2 text-xs text-slate-500">Déclaration: {{ $check->environmentalClaim->title }}</p>
+                                            <p class="mt-2 text-xs text-slate-600">Déclaration: {{ $check->environmentalClaim->title }}</p>
                                         @endif
                                     </div>
                                 @endforeach
@@ -333,13 +333,13 @@
                                 @if($predicted)
                                     <li class="rounded-xl bg-violet-50 p-3">
                                         <span class="font-semibold text-violet-900">Pour vous : {{ number_format($predicted['rating'], 1, ',', '') }}/5</span><br>
-                                        <span class="text-xs text-slate-500">Note moyenne donnée par {{ $predicted['neighbours'] }} consommateurs aux goûts proches des vôtres.</span>
+                                        <span class="text-xs text-slate-600">Note moyenne donnée par {{ $predicted['neighbours'] }} consommateurs aux goûts proches des vôtres.</span>
                                     </li>
                                 @endif
                                 @if($anomaly)
                                     <li>
                                         @if($anomaly['is_anomaly'])
-                                            <span class="font-semibold text-amber-700">Empreinte inhabituelle</span> pour un produit « {{ $product->category }} » : les valeurs déclarées sont en cours de vérification.
+                                            <span class="font-semibold text-amber-800">Empreinte inhabituelle</span> pour un produit « {{ $product->category }} » : les valeurs déclarées sont en cours de vérification.
                                         @else
                                             <span class="font-semibold text-emerald-700">Empreinte cohérente</span> avec les produits de la même catégorie.
                                         @endif
@@ -351,7 +351,7 @@
                                         @if($footprint?->co2_emissions !== null)
                                             (déclaré : {{ $footprint->co2_emissions }})
                                         @else
-                                            <span class="text-xs text-slate-500">(empreinte non encore mesurée)</span>
+                                            <span class="text-xs text-slate-600">(empreinte non encore mesurée)</span>
                                         @endif
                                     </li>
                                 @endif
@@ -359,12 +359,12 @@
                                     <li>
                                         Ton des avis :
                                         <span class="text-emerald-700">{{ $sentiments['positif'] ?? 0 }} positif(s)</span> ·
-                                        <span class="text-amber-700">{{ $sentiments['neutre'] ?? 0 }} neutre(s)</span> ·
+                                        <span class="text-amber-800">{{ $sentiments['neutre'] ?? 0 }} neutre(s)</span> ·
                                         <span class="text-red-700">{{ $sentiments['négatif'] ?? 0 }} négatif(s)</span>
                                     </li>
                                 @endif
                             </ul>
-                            <p class="mt-3 text-xs text-slate-500">Modèles de machine learning exécutés par Trace Verte. <a href="{{ route('ai-tools.index') }}" class="tv-link">Essayer les outils IA</a></p>
+                            <p class="mt-3 text-xs text-slate-600">Modèles de machine learning exécutés par Trace Verte. <a href="{{ route('ai-tools.index') }}" class="tv-link">Essayer les outils IA</a></p>
                         </div>
                     @endif
 
@@ -373,10 +373,7 @@
                         @if($product->openAlerts->isNotEmpty())
                             @foreach($product->openAlerts as $alert)
                                 <div class="mb-3 rounded-xl border border-red-100 bg-red-50 p-3">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <x-alert-badge :alert="$alert" />
-                                        <span class="text-xs text-red-700">{{ $alert->severity }}</span>
-                                    </div>
+                                    <x-alert-badge :alert="$alert" />
                                     <p class="mt-2 text-sm font-medium text-slate-800">{{ $alert->title }}</p>
                                 </div>
                             @endforeach
@@ -394,7 +391,7 @@
                                         <span class="text-sm font-medium text-slate-700">{{ $analysis->analysis_type ?? 'Analyse' }}</span>
                                         <x-footprint-score :score="(int) ($analysis->greenwashing_score ?? 0)" />
                                     </div>
-                                    <p class="mt-2 text-xs text-slate-500">Modèle : {{ $analysis->model_used ?? 'Démonstration' }}</p>
+                                    <p class="mt-2 text-xs text-slate-600">Modèle : {{ $analysis->model_used ?? 'Démonstration' }}</p>
                                 </div>
                             @endforeach
                         @else

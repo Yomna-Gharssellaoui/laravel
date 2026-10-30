@@ -30,7 +30,7 @@
                             <td>{{ $item->product?->name ?? '—' }}</td><td>{{ $item->co2_emissions ?? '—' }}</td><td>{{ $item->water_usage ?? '—' }}</td><td>{{ $item->ai_score ?? '—' }}</td>
                             <td>
                                 @php($anomaly = $ml->footprintAnomaly($item))
-                                @if($anomaly === null) <span class="text-xs text-slate-400">—</span>
+                                @if($anomaly === null) <span class="text-xs text-slate-500">—</span>
                                 @elseif($anomaly['is_anomaly']) <x-ml-badge level="bad" title="Isolation Forest (M5)">Atypique</x-ml-badge>
                                 @else <x-ml-badge level="good" title="Isolation Forest (M5)">Cohérente</x-ml-badge>
                                 @endif

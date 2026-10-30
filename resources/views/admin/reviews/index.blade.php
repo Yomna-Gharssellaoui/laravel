@@ -40,7 +40,7 @@
                                     @else
                                         <x-ml-badge :level="['positif' => 'good', 'neutre' => 'warn', 'négatif' => 'bad'][$analysis['sentiment']]" title="Confiance : {{ $analysis['confidence'] }} %">{{ $analysis['sentiment'] }}</x-ml-badge>
                                     @endif
-                                @else <span class="text-xs text-slate-400">—</span>
+                                @else <span class="text-xs text-slate-500">—</span>
                                 @endif
                             </td><td>{{ $item->title ?? '—' }}</td><td><x-status-badge :status="$item->status ?? '—'" /></td>
                             <td class="text-right whitespace-nowrap">

@@ -10,7 +10,7 @@
             
             <button class="tv-btn-secondary" type="submit">Filtrer</button>
         </form>
-        <p class="text-sm {{ $aiEnabled ? 'text-emerald-700' : 'text-amber-700' }}">
+        <p class="text-sm {{ $aiEnabled ? 'text-emerald-700' : 'text-amber-800' }}">
             {{ $aiEnabled ? 'Analyse par IA active ('.$modelName.').' : 'Mode heuristique : ajoutez GEMINI_API_KEY ou ANTHROPIC_API_KEY dans .env pour activer l’IA.' }}
             Lancez une analyse depuis une déclaration ou un produit.
         </p>

@@ -64,13 +64,13 @@
                                 <div class="h-full {{ ['bad' => 'bg-red-500', 'warn' => 'bg-amber-500', 'good' => 'bg-emerald-500'][$level] }}" style="width: {{ $probability }}%"></div>
                             </div>
                             <p class="mt-4 rounded-xl bg-white p-3 text-sm leading-relaxed text-slate-800">{!! $marked !!}</p>
-                            <p class="mt-2 text-xs text-slate-500"><mark class="rounded bg-red-100 px-0.5 text-red-800">rouge</mark> : expressions vagues ou invérifiables · <mark class="rounded bg-emerald-100 px-0.5 text-emerald-800">vert</mark> : éléments vérifiables</p>
+                            <p class="mt-2 text-xs text-slate-600"><mark class="rounded bg-red-100 px-0.5 text-red-800">rouge</mark> : expressions vagues ou invérifiables · <mark class="rounded bg-emerald-100 px-0.5 text-emerald-800">vert</mark> : éléments vérifiables</p>
                             @if($level !== 'good')
                                 <p class="mt-3 text-sm text-slate-700">Une allégation crédible cite des preuves : chiffre mesuré avec sa période, organisme certificateur, numéro de certificat, rapport consultable.</p>
                             @endif
                         </div>
                     @else
-                        <p class="mt-6 text-sm text-amber-700">Analyse indisponible pour le moment, réessayez plus tard.</p>
+                        <p class="mt-6 text-sm text-amber-800">Analyse indisponible pour le moment, réessayez plus tard.</p>
                     @endif
                 @endisset
             </section>
@@ -119,13 +119,13 @@
                                 <div class="rounded-xl bg-brand-50 p-3">
                                     <p class="text-xs uppercase tracking-wide text-brand-700">{{ $label }}</p>
                                     <p class="mt-1 text-xl font-semibold text-brand-900">{{ $estimate[$key]['value'] }}</p>
-                                    <p class="text-xs text-slate-500">{{ $unit }} · {{ $estimate[$key]['low'] }}–{{ $estimate[$key]['high'] }}</p>
+                                    <p class="text-xs text-slate-600">{{ $unit }} · {{ $estimate[$key]['low'] }}–{{ $estimate[$key]['high'] }}</p>
                                 </div>
                             @endforeach
                             <div class="rounded-xl bg-brand-50 p-3">
                                 <p class="text-xs uppercase tracking-wide text-brand-700">Score</p>
                                 <p class="mt-1 text-xl font-semibold text-brand-900">{{ $score ?? '—' }}<span class="text-sm font-normal">/100</span></p>
-                                <p class="text-xs text-slate-500">100 = très sobre</p>
+                                <p class="text-xs text-slate-600">100 = très sobre</p>
                             </div>
                         </div>
 
@@ -135,7 +135,7 @@
                                 @foreach($improvements as $improvement)
                                     <li class="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
                                         <span>{{ $improvement['label'] }}</span>
-                                        <span class="font-semibold text-emerald-700">−{{ $improvement['gain'] }} % <span class="font-normal text-slate-500">({{ $improvement['co2'] }} kg)</span></span>
+                                        <span class="font-semibold text-emerald-700">−{{ $improvement['gain'] }} % <span class="font-normal text-slate-600">({{ $improvement['co2'] }} kg)</span></span>
                                     </li>
                                 @endforeach
                             </ul>
@@ -152,9 +152,9 @@
                                 @endforeach
                             </ul>
                         @endif
-                        <p class="mt-4 text-xs text-slate-500">Estimation par Random Forest, entraînée sur 3 000 produits ; la fourchette couvre 80 % des cas.</p>
+                        <p class="mt-4 text-xs text-slate-600">Estimation par Random Forest, entraînée sur 3 000 produits ; la fourchette couvre 80 % des cas.</p>
                     @else
-                        <p class="mt-6 text-sm text-amber-700">Estimation indisponible pour le moment, réessayez plus tard.</p>
+                        <p class="mt-6 text-sm text-amber-800">Estimation indisponible pour le moment, réessayez plus tard.</p>
                     @endif
                 @endisset
             </section>

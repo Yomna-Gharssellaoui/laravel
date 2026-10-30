@@ -1,4 +1,4 @@
-@props(['status' => 'pending', 'type' => ''])
+@props(['status' => 'pending', 'type' => '', 'label' => ''])
 
 @php
     $classes = match ($status) {
@@ -10,6 +10,6 @@
 @endphp
 
 <span {{ $attributes->merge(['class' => "inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium {$classes}"]) }}>
-    <span>{{ $type }}</span>
+    <span>{{ $label ?: $type }}</span>
     <x-status-badge :status="$status" />
 </span>

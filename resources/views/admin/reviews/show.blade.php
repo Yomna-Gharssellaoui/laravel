@@ -32,14 +32,14 @@
                 <div>
                     <p class="font-semibold">Sentiment : {{ $analysis['sentiment'] }} ({{ $analysis['confidence'] }} %)</p>
                     @foreach($analysis['probabilities'] as $label => $value)
-                        <div class="mt-1 flex items-center gap-2"><span class="w-16 text-slate-500">{{ $label }}</span><div class="h-2 flex-1 rounded-full bg-slate-100"><div class="h-2 rounded-full bg-violet-500" style="width: {{ $value }}%"></div></div><span class="w-12 text-right">{{ $value }} %</span></div>
+                        <div class="mt-1 flex items-center gap-2"><span class="w-16 text-slate-600">{{ $label }}</span><div class="h-2 flex-1 rounded-full bg-slate-100"><div class="h-2 rounded-full bg-violet-500" style="width: {{ $value }}%"></div></div><span class="w-12 text-right">{{ $value }} %</span></div>
                     @endforeach
                 </div>
                 <div>
                     <p class="font-semibold {{ $analysis['is_spam'] ? 'text-red-700' : 'text-emerald-700' }}">{{ $analysis['is_spam'] ? 'Spam probable' : 'Pas de spam détecté' }} ({{ $analysis['spam_probability'] }} %)</p>
-                    <p class="mt-1 text-xs text-slate-500">TF-IDF + régression logistique, entraînés sur 6 000 avis. Les liens et numéros de téléphone sont reconnus comme indices de spam.</p>
+                    <p class="mt-1 text-xs text-slate-600">TF-IDF + régression logistique, entraînés sur 6 000 avis. Les liens et numéros de téléphone sont reconnus comme indices de spam.</p>
                     @if($item->rating >= 4 && $analysis['sentiment'] === 'négatif' || $item->rating <= 2 && $analysis['sentiment'] === 'positif')
-                        <p class="mt-2 text-xs font-semibold text-amber-700">La note ({{ $item->rating }}/5) contredit le texte : à vérifier.</p>
+                        <p class="mt-2 text-xs font-semibold text-amber-800">La note ({{ $item->rating }}/5) contredit le texte : à vérifier.</p>
                     @endif
                 </div>
             </div>

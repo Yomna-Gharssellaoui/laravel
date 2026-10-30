@@ -39,7 +39,7 @@
             </p>
             <div class="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
                 @foreach($anomaly['ratio_to_category_median'] as $key => $ratio)
-                    <div class="rounded-lg bg-violet-50 p-3"><span class="text-slate-500">{{ $labels[$key] }}</span><br><strong>× {{ $ratio }}</strong> la médiane de la catégorie</div>
+                    <div class="rounded-lg bg-violet-50 p-3"><span class="text-slate-600">{{ $labels[$key] }}</span><br><strong>× {{ $ratio }}</strong> la médiane de la catégorie</div>
                 @endforeach
             </div>
         @endif
