@@ -232,14 +232,15 @@ class TraceVerteDatasetSeeder extends Seeder
     private function footprints(array $p): void
     {
         $data = [
-            'huile' => [3.2, 40, 1.8],
-            'dattes' => [1.1, 90, 1.2],
-            'harissa' => [2.4, 120, 0.9],
-            'couscous' => [1.6, 210, 2.5],
-            'miel' => [0.8, 15, 0.3],
-            'leben' => [18.5, 620, 8.4],   // above the CO2 alert threshold
-            'jus' => [0.9, 140, 0.6],
-            'amandes' => [4.1, 480, 3.2],
+            // Realistic values for each category (consistent with the ML training data in ml/)
+            'huile' => [3.1, 240, 4.8],
+            'dattes' => [1.2, 290, 2.6],
+            'harissa' => [2.2, 160, 1.1],
+            'couscous' => [1.4, 210, 2.0],
+            'miel' => [0.8, 80, 1.1],
+            'leben' => [18.5, 620, 8.4],   // deliberately abnormal: CO2 alert + ML anomaly
+            'jus' => [0.6, 130, 0.7],
+            'amandes' => [1.0, 270, 3.1],
             // "tomates" has no footprint: it cannot be published yet
         ];
 
