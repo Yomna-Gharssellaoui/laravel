@@ -19,6 +19,7 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" force="true"/>
         <env name="AI_PROVIDER" value="auto"/>
         <env name="ML_SERVICE_URL" value=""/>
         <env name="GEMINI_API_KEY" value=""/>
