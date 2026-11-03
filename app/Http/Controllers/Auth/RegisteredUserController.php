@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -30,17 +31,30 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        ];
+
+        $canChooseRole = app()->environment(['local', 'testing']);
+
+        if ($canChooseRole) {
+            $rules['role'] = ['sometimes', Rule::in(User::ROLES)];
+        }
+
+        $data = $request->validate($rules);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
         ]);
+
+        if ($canChooseRole && isset($data['role'])) {
+            $user->role = $data['role'];
+            $user->save();
+        }
 
         event(new Registered($user));
 

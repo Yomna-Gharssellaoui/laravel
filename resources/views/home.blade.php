@@ -615,10 +615,10 @@
             <span>Trace Verte</span>
         </a>
         <div class="nav-links">
-            <a href="{{ route('products.index') }}" class="nav-link">Produits</a>
-            <a href="{{ route('producers.index') }}" class="nav-link">Producteurs</a>
-            <a href="{{ route('transformers.index') }}" class="nav-link">Transformateurs</a>
-            <a href="{{ route('ai-tools.index') }}" class="nav-link">Outils IA</a>
+            <a href="{{ auth()->check() ? route('products.index') : route('login') }}" class="nav-link">Produits</a>
+            <a href="{{ auth()->check() ? route('producers.index') : route('login') }}" class="nav-link">Producteurs</a>
+            <a href="{{ auth()->check() ? route('transformers.index') : route('login') }}" class="nav-link">Transformateurs</a>
+            <a href="{{ auth()->check() ? route('ai-tools.index') : route('login') }}" class="nav-link">Outils IA</a>
             @auth
                 <a href="{{ route('dashboard') }}" class="nav-link">{{ auth()->user()->canAccessBackOffice() ? 'Back-office' : 'Mon espace' }}</a>
                 <form method="POST" action="{{ route('logout') }}" style="display: inline;">
@@ -639,7 +639,7 @@
                 <h1>La transparence environnementale pour chaque produit</h1>
                 <p class="subtitle">Suivez l'empreinte écologique de vos produits depuis la source jusqu'à votre table. Une traçabilité complète, une confiance totale.</p>
                 <div class="hero-cta">
-                    <a href="{{ route('products.index') }}" class="btn-primary">Explorer les produits</a>
+                    <a href="{{ auth()->check() ? route('products.index') : route('login') }}" class="btn-primary">Explorer les produits</a>
                     <a href="#features" class="btn-outline">En savoir plus</a>
                 </div>
             </div>
@@ -787,7 +787,7 @@
             </p>
             <div class="hero-cta" style="justify-content: center;">
                 <a href="{{ route('register') }}" class="btn-primary">Créer un compte gratuit</a>
-                <a href="{{ route('products.index') }}" class="btn-outline">Voir les produits</a>
+                <a href="{{ auth()->check() ? route('products.index') : route('login') }}" class="btn-outline">Voir les produits</a>
             </div>
             <p class="cta-description" style="margin-top: 1.5rem; margin-bottom: 0;">
                 Vous êtes producteur, transformateur ou distributeur ?

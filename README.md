@@ -28,19 +28,28 @@ npm install && npm run build
 composer dev   # serveur + worker de file d'attente + logs + Vite
 ```
 
-### Recevoir les emails en local
+### Vérification email et envoi des emails
 
-Par défaut (`MAIL_MAILER=log`) les emails sont écrits dans `storage/logs/laravel.log`.
-Pour les recevoir réellement, utilisez un compte gratuit [Mailtrap](https://mailtrap.io) (Email Testing)
-et copiez ses identifiants SMTP dans `.env` :
+Après l’inscription, Laravel envoie automatiquement un lien d’activation. Les pages protégées restent
+inaccessibles tant que l’adresse n’a pas été vérifiée. Pour envoyer ce lien avec Gmail, configurez
+les paramètres SMTP dans votre fichier `.env` :
 
 ```env
 MAIL_MAILER=smtp
-MAIL_HOST=sandbox.smtp.mailtrap.io
-MAIL_PORT=2525
-MAIL_USERNAME=...
-MAIL_PASSWORD=...
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=votre-adresse@gmail.com
+MAIL_PASSWORD=votre_mot_de_passe_d_application_google
+MAIL_FROM_ADDRESS=votre-adresse@gmail.com
 ```
+
+Dans votre compte Google, activez la validation en deux étapes, puis créez un **mot de passe
+d’application** depuis la sécurité du compte Google. Mettez votre adresse Gmail dans
+`MAIL_USERNAME` et `MAIL_FROM_ADDRESS`, et ce mot de passe d’application dans `MAIL_PASSWORD`
+(pas le mot de passe habituel de votre compte). Si l’option des mots de passe d’application n’est
+pas disponible, vérifiez les règles de sécurité ou d’administration de votre compte Google.
+Gardez ce mot de passe uniquement dans `.env` (jamais dans Git), puis exécutez
+`php artisan config:clear` et redémarrez le serveur. Le modèle est dans `.env.example`.
 
 Tâches planifiées (expiration des certifications, alertes automatiques) :
 
