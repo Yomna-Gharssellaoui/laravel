@@ -19,10 +19,11 @@ class AccountSecurityTest extends TestCase
         Storage::fake('public');
         $user = User::factory()->create();
 
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
         $this->actingAs($user)->patch('/profile', [
             'name' => $user->name,
             'email' => $user->email,
-            'avatar' => UploadedFile::fake()->image('me.jpg', 200, 200),
+            'avatar' => UploadedFile::fake()->createWithContent('me.png', $png),
         ])->assertSessionHasNoErrors();
 
         $path = $user->fresh()->avatar_path;

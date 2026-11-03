@@ -21,10 +21,10 @@
             <button type="button" class="rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 lg:hidden" data-menu-toggle aria-expanded="false" aria-controls="main-menu">Menu</button>
 
             <div id="main-menu" class="hidden w-full flex-col gap-3 lg:flex lg:w-auto lg:flex-row lg:items-center lg:gap-6" data-menu>
-                <a href="{{ route('products.index') }}" class="text-sm font-medium {{ request()->routeIs('products.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Produits</a>
-                <a href="{{ route('producers.index') }}" class="text-sm font-medium {{ request()->routeIs('producers.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Producteurs</a>
-                <a href="{{ route('transformers.index') }}" class="text-sm font-medium {{ request()->routeIs('transformers.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Transformateurs</a>
-                <a href="{{ route('ai-tools.index') }}" class="text-sm font-medium {{ request()->routeIs('ai-tools.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Outils IA</a>
+                <a href="{{ auth()->check() ? route('products.index') : route('login') }}" class="text-sm font-medium {{ request()->routeIs('products.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Produits</a>
+                <a href="{{ auth()->check() ? route('producers.index') : route('login') }}" class="text-sm font-medium {{ request()->routeIs('producers.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Producteurs</a>
+                <a href="{{ auth()->check() ? route('transformers.index') : route('login') }}" class="text-sm font-medium {{ request()->routeIs('transformers.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Transformateurs</a>
+                <a href="{{ auth()->check() ? route('ai-tools.index') : route('login') }}" class="text-sm font-medium {{ request()->routeIs('ai-tools.*') ? 'text-brand-700' : 'text-slate-600 hover:text-brand-700' }}">Outils IA</a>
 
                 <form action="{{ route('products.index') }}" method="GET" class="flex" role="search">
                     <input type="search" name="q" value="{{ request('q') }}" placeholder="Rechercher un produit…" aria-label="Rechercher" class="tv-input w-full lg:w-56">
