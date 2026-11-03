@@ -7,16 +7,6 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
-<div class="form-group">
-    <label for="role" class="form-label">Type de compte</label>
-    <select id="role" name="role" class="form-input" required>
-        <option value="consumer" @selected(old('role', 'consumer') === 'consumer')>Consommateur</option>
-        <option value="admin" @selected(old('role') === 'admin')>Administrateur</option>
-    </select>
-    @error('role')
-        <div class="form-error">{{ $message }}</div>
-    @enderror
-</div>
 
         <!-- Name -->
         <div class="form-group">
