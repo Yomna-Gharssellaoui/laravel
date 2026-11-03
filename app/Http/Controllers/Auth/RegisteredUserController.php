@@ -35,13 +35,8 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => ['sometimes', Rule::in(['admin', 'consumer'])],
         ];
-
-        $canChooseRole = app()->environment(['local', 'testing']);
-
-        if ($canChooseRole) {
-            $rules['role'] = ['sometimes', Rule::in(User::ROLES)];
-        }
 
         $data = $request->validate($rules);
 
@@ -49,12 +44,8 @@ class RegisteredUserController extends Controller
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'role' => $data['role'] ?? 'consumer',
         ]);
-
-        if ($canChooseRole && isset($data['role'])) {
-            $user->role = $data['role'];
-            $user->save();
-        }
 
         event(new Registered($user));
 
