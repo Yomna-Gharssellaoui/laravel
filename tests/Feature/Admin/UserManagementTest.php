@@ -31,13 +31,12 @@ class UserManagementTest extends TestCase
         Notification::assertSentTo($user, VerifyEmail::class);
     }
 
-    public function test_admin_role_can_be_chosen_at_registration_in_testing(): void
+    public function test_registration_assigns_consumer_and_does_not_expose_a_role_selector(): void
     {
         $this->get('/register')
             ->assertOk()
-            ->assertSee('name="role"', false)
-            ->assertSee('value="admin"', false)
-            ->assertDontSee('value="admin" disabled', false);
+            ->assertDontSee('name="role"', false)
+            ->assertDontSee('value="admin"', false);
 
         $this->post('/register', [
             'name' => 'Admin de test',
@@ -47,10 +46,10 @@ class UserManagementTest extends TestCase
             'role' => 'admin',
         ]);
 
-        $this->assertSame('admin', User::where('email', 'admin-test@example.com')->value('role'));
+        $this->assertSame('consumer', User::where('email', 'admin-test@example.com')->value('role'));
     }
 
-    public function test_admin_role_cannot_be_chosen_at_registration_in_production(): void
+    public function test_registration_ignores_a_submitted_admin_role_in_production(): void
     {
         $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
         $this->app['env'] = 'production';
@@ -58,7 +57,8 @@ class UserManagementTest extends TestCase
 
         $this->get('/register')
             ->assertOk()
-            ->assertSee('value="admin" disabled', false);
+            ->assertDontSee('name="role"', false)
+            ->assertDontSee('value="admin"', false);
 
         $this->post('/register', [
             'name' => 'Visiteur',
