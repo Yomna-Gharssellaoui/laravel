@@ -12,20 +12,9 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\TransformerController;
 use App\Http\Controllers\TwoFactorController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-// TEMPORARY: Diagnose HTTPS proxy headers from ngrok
-Route::get('/__proxy-check', function (Request $request) {
-    return response()->json([
-        'scheme' => $request->getScheme(),
-        'is_secure' => $request->isSecure(),
-        'host' => $request->getHost(),
-        'x_forwarded_proto' => $request->header('X-Forwarded-Proto'),
-        'x_forwarded_host' => $request->header('X-Forwarded-Host'),
-        'app_url' => config('app.url'),
-    ]);
-});
+
 // Role-based landing page after login / registration
 Route::get('/dashboard', function () {
     return redirect()->route(auth()->user()->homeRoute());
